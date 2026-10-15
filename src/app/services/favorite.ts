@@ -1,5 +1,55 @@
-import { Service } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import {
+  collection, deleteDoc, doc, getDocs, query, serverTimestamp, setDoc, where,
+} from 'firebase/firestore';
+import { FirebaseService } from './firebase.service';
+import { Auth } from './auth';
+import { Favorite as FavoriteModel } from '../models/favorite.model';
+import { Movie } from '../models/movie.model';
 
-@Service()
+@Injectable({ providedIn: 'root' })
 export class Favorite {
+  private readonly firebase = inject(FirebaseService);
+  private readonly auth = inject(Auth);
+
+async list(): Promise<FavoriteModel[]> {
+  console.log('SERVICE: avant requireUserId');
+  const userId = await this.requireUserId();
+  console.log('SERVICE: userId =', userId);
+  const q = query(
+    collection(this.firebase.firestore, 'favorites'),
+    where('userId', '==', userId),
+  );
+  const snapshot = await getDocs(q);
+  console.log('SERVICE: docs =', snapshot.size);
+  return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }) as FavoriteModel);
+}
+
+  async add(movie: Movie): Promise<void> {
+    const userId = await this.requireUserId();
+    await setDoc(doc(this.firebase.firestore, 'favorites', `${userId}_${movie.id}`), {
+      ...movie,
+      userId,
+      addedAt: serverTimestamp(),
+    });
+  }
+
+  async remove(movieId: string): Promise<void> {
+    const userId = await this.requireUserId();
+    const documentId = movieId.startsWith(`${userId}_`) ? movieId : `${userId}_${movieId}`;
+    await deleteDoc(doc(this.firebase.firestore, 'favorites', documentId));
+  }
+
+  async listAll(): Promise<FavoriteModel[]> {
+    const snapshot = await getDocs(collection(this.firebase.firestore, 'favorites'));
+    return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }) as FavoriteModel);
+  }
+
+  private async requireUserId(): Promise<string> {
+    const user = await this.auth.waitForAuthState();
+    if (!user) {
+      throw new Error('Vous devez être connecté pour gérer vos favoris.');
+    }
+    return user.uid;
+  }
 }

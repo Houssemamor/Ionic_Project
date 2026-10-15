@@ -8,7 +8,7 @@ pour l'authentification et le stockage des profils utilisateurs.
 ### Fonctionnalités implémentées
 
 - **Création de compte** depuis `/register` avec les champs prénom, nom, âge,
-  e-mail, mot de passe et confirmation du mot de passe.
+  photo prise avec la caméra, e-mail, mot de passe et confirmation du mot de passe.
 - **Validation de l'inscription** :
   - tous les champs sont obligatoires ;
   - l'âge doit être compris entre 13 et 120 ans ;
@@ -16,6 +16,8 @@ pour l'authentification et le stockage des profils utilisateurs.
   - les deux mots de passe doivent être identiques.
 - **Connexion** depuis `/login` avec e-mail et mot de passe.
 - **Déconnexion** depuis l'accueil ou le profil.
+- **Photo de profil** : capture via Capacitor Camera, envoi vers Firebase Storage
+  et sauvegarde de l'URL dans le profil Firestore.
 - **Gestion des profils dans Firestore** : la création d'un compte crée un
   document dans la collection `users`, avec le rôle `user`, le statut actif et
   la date de création.
@@ -29,23 +31,21 @@ pour l'authentification et le stockage des profils utilisateurs.
   tentatives, mot de passe faible).
 - **Protection contre les attentes infinies** lors du chargement de l'état
   d'authentification et du profil, avec des délais d'expiration explicites.
+- **Films MovieDB** : liste populaire, recherche et détails via l'API TMDB.
+- **Playlist personnelle** : ajout et suppression de films favoris dans
+  `favorites`, avec séparation par utilisateur.
+- **Matching** : affichage des utilisateurs actifs dont le taux de films en
+  commun est strictement supérieur à 75 % (formule de Jaccard).
 
 ### Écrans présents mais pas encore fonctionnels
 
 Les routes suivantes existent et sont protégées par l'authentification, mais
 leur interface est encore une page Ionic de base sans logique métier :
 
-- `/movies` : liste des films ;
-- `/movie-details` : détails d'un film ;
-- `/favorites` : films favoris ;
-- `/matching` : matching ;
 - `/admin/dashboard` : tableau de bord administrateur ;
-- `/admin/users` : gestion des utilisateurs ;
-- `/admin/movies` : gestion des films.
 
-Les services `Movie`, `Favorite` et `Matching` sont actuellement des
-squelettes. Les routes utilisateur vérifient qu'un profil actif est présent et
-les routes administrateur exigent un profil actif dont le rôle vaut `admin`.
+Les routes utilisateur vérifient qu'un profil actif est présent et les routes
+administrateur exigent un profil actif dont le rôle vaut `admin`.
 
 ## Technologies utilisées
 
@@ -54,9 +54,9 @@ les routes administrateur exigent un profil actif dont le rôle vaut `admin`.
 - Capacitor 8
 - Firebase 12 :
   - Firebase Authentication (e-mail / mot de passe) ;
-  - Cloud Firestore (profils utilisateurs) ;
-  - Firebase Storage (initialisé, mais pas encore utilisé par une fonctionnalité
-    d'interface).
+  - Cloud Firestore (profils, films et playlists) ;
+  - Firebase Storage (photos de profil).
+- un compte TMDB et une clé API.
 - TypeScript 6
 
 ## Prérequis
@@ -71,12 +71,27 @@ La configuration Firebase est définie dans :
 
 - `src/environments/environment.ts` pour le développement ;
 - `src/environments/environment.prod.ts` pour la production.
+- renseigner `tmdb.apiKey` dans ces deux fichiers d'environnement.
 
 Les règles Firestore versionnées se trouvent dans `firestore.rules`. Après
 configuration du projet Firebase, elles peuvent être déployées avec :
 
 ```bash
 npx firebase-tools deploy --only firestore:rules
+```
+
+Les règles Storage peuvent être déployées avec :
+
+```bash
+npx firebase-tools deploy --only storage
+```
+
+Pour tester la caméra sur Android/iOS, ajouter la plateforme native puis
+synchroniser Capacitor :
+
+```bash
+npx cap add android
+npx cap sync
 ```
 
 ## Installation
@@ -170,10 +185,10 @@ src/
 | `/register` | Public | Inscription fonctionnelle |
 | `/home` | Authentifié | Accueil et déconnexion fonctionnels |
 | `/profile` | Authentifié | Consultation du profil fonctionnelle |
-| `/movies` | Authentifié | Placeholder |
-| `/movie-details` | Authentifié | Placeholder |
-| `/favorites` | Authentifié | Placeholder |
-| `/matching` | Authentifié | Placeholder |
+| `/movies` | Authentifié | Films populaires et recherche MovieDB |
+| `/movie-details/:id` | Authentifié | Détails MovieDB et favoris |
+| `/favorites` | Authentifié | Playlist personnelle |
+| `/matching` | Authentifié | Correspondances supérieures à 75 % |
 | `/admin/dashboard` | Administrateur actif | Placeholder |
 | `/admin/users` | Administrateur actif | Placeholder |
 | `/admin/movies` | Administrateur actif | Placeholder |
@@ -198,9 +213,7 @@ Les profils stockés dans Firestore suivent la structure suivante :
 
 ## Limites connues
 
-- La récupération et la modification de la photo de profil ne sont pas encore
-  exposées dans l'interface.
-- La recherche de films, les détails, les favoris et le matching ne sont pas
-  encore reliés à une API ou à Firestore.
-- Les fonctionnalités métier d'administration doivent encore être développées ;
-  le contrôle d'accès par rôle est toutefois actif.
+- La clé TMDB doit être renseignée manuellement dans les environnements.
+- La liste des profils est lisible par les utilisateurs authentifiés afin de
+  permettre le calcul du matching côté client.
+- Le dashboard administrateur reste à compléter.

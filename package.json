@@ -24,6 +24,7 @@
     "@angular/platform-browser": "22.2.1",
     "@angular/router": "22.2.1",
     "@capacitor/app": "8.1.2",
+    "@capacitor/camera": "^8.2.5",
     "@capacitor/core": "8.5.3",
     "@capacitor/haptics": "8.0.2",
     "@capacitor/keyboard": "8.0.6",
@@ -51,5 +52,4 @@
     "vitest": "~4.0.18"
   },
   "description": "An Ionic project"
- 
 }

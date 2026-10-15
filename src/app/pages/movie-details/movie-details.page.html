@@ -1,13 +1,37 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>movie-details</ion-title>
+    <ion-title>Détails du film</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">movie-details</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  @if (isLoading()) {
+    <div class="ion-text-center ion-padding"><ion-spinner></ion-spinner></div>
+  } @else if (errorMessage() && !movie()) {
+    <ion-text color="danger"><p>{{ errorMessage() }}</p></ion-text>
+    <ion-button routerLink="/movies">Retour aux films</ion-button>
+  } @else if (movie(); as m) {
+    @if (errorMessage()) {
+      <ion-text color="danger"><p>{{ errorMessage() }}</p></ion-text>
+    }
+
+    <ion-card>
+      @if (m.posterPath) {
+        <img class="poster" [src]="tmdb.imageUrl(m.posterPath)" [alt]="m.title" />
+      }
+      <ion-card-content>
+        <ion-card-title>{{ m.title }}</ion-card-title>
+        <p>
+          @if (m.releaseDate) { Sortie : {{ m.releaseDate }} · }
+          Note : {{ m.voteAverage }}/10
+        </p>
+        <p>{{ m.overview }}</p>
+
+        <ion-button [color]="isFavorite() ? 'danger' : 'medium'" (click)="toggleFavorite()">
+          {{ isFavorite() ? '♥ Retirer des favoris' : '♡ Ajouter aux favoris' }}
+        </ion-button>
+        <ion-button fill="outline" routerLink="/movies">Retour</ion-button>
+      </ion-card-content>
+    </ion-card>
+  }
 </ion-content>

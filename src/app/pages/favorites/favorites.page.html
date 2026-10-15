@@ -1,13 +1,31 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>favorites</ion-title>
+    <ion-title>Ma playlist de favoris</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">favorites</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  @if (isLoading()) {
+    <div class="ion-text-center ion-padding">
+      <ion-spinner></ion-spinner>
+    </div>
+  } @else {
+    @if (errorMessage()) {
+      <ion-text color="danger"><p>{{ errorMessage() }}</p></ion-text>
+    }
+
+    @for (favorite of favorites(); track favorite.id) {
+      <ion-card>
+        <ion-card-content>
+          <h2>{{ favorite.title }}</h2>
+          <ion-button color="danger" (click)="remove(favorite.id)">Retirer</ion-button>
+        </ion-card-content>
+      </ion-card>
+    } @empty {
+      @if (!errorMessage()) {
+        <ion-text><p>Aucun film dans votre playlist.</p></ion-text>
+        <ion-button routerLink="/movies">Découvrir des films</ion-button>
+      }
+    }
+  }
 </ion-content>

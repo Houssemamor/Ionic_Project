@@ -1,13 +1,37 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>matching</ion-title>
+    <ion-title>Mes correspondances</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">matching</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <p>Utilisateurs ayant plus de 75 % de films favoris en commun.</p>
+
+  @if (isLoading()) {
+    <div class="ion-text-center ion-padding"><ion-spinner></ion-spinner></div>
+  } @else if (errorMessage()) {
+    <ion-text color="danger"><p>{{ errorMessage() }}</p></ion-text>
+  } @else if (myFavoritesCount() === 0) {
+    <ion-text><p>Ajoutez d'abord des films à vos favoris pour trouver des correspondances.</p></ion-text>
+    <ion-button routerLink="/movies">Découvrir des films</ion-button>
+  } @else {
+    @for (match of matches(); track match.user.id) {
+      <ion-card>
+        <ion-card-content>
+          <ion-item lines="none">
+            @if (match.user.photoUrl) {
+              <ion-avatar slot="start"><img [src]="match.user.photoUrl" [alt]="match.user.firstName" /></ion-avatar>
+            }
+            <ion-label>
+              <h2>{{ match.user.firstName }} {{ match.user.lastName }}</h2>
+              <p><strong>{{ match.rate }} %</strong> de correspondance</p>
+            </ion-label>
+          </ion-item>
+          <p>Films en commun : {{ match.commonTitles.join(', ') }}</p>
+        </ion-card-content>
+      </ion-card>
+    } @empty {
+      <ion-text><p>Aucun utilisateur n'atteint 75 % de correspondance pour le moment.</p></ion-text>
+    }
+  }
 </ion-content>

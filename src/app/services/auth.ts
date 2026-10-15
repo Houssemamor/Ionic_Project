@@ -15,6 +15,7 @@ import {
   setDoc,
   updateDoc,
 } from 'firebase/firestore';
+import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import { FirebaseService } from './firebase.service';
 import { UserProfile } from '../models/user.model';
 
@@ -24,6 +25,7 @@ export interface RegisterData {
   age: number;
   email: string;
   password: string;
+  photoDataUrl: string;
 }
 
 const PROFILE_REQUEST_TIMEOUT_MS = 10000;
@@ -57,6 +59,11 @@ export class Auth {
       ...profile,
       createdAt: serverTimestamp(),
     });
+    const photoReference = ref(this.firebase.storage, `profile-photos/${credential.user.uid}`);
+    await uploadString(photoReference, data.photoDataUrl, 'data_url');
+    const photoUrl = await getDownloadURL(photoReference);
+    await updateDoc(doc(this.firebase.firestore, 'users', credential.user.uid), { photoUrl });
+    profile.photoUrl = photoUrl;
 
     return profile;
   }

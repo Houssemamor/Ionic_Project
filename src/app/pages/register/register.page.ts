@@ -15,6 +15,7 @@ import {
   IonToolbar,
 } from '@ionic/angular';
 import { Auth } from '../../services/auth';
+import { Camera, CameraResultType } from '@capacitor/camera';
 
 @Component({
   selector: 'app-register',
@@ -45,6 +46,24 @@ export class RegisterPage {
   confirmPassword = '';
   errorMessage = '';
   isSubmitting = false;
+  photoDataUrl = '';
+
+  async takePhoto(): Promise<void> {
+    this.errorMessage = '';
+    try {
+      const photo = await Camera.getPhoto({
+        quality: 80,
+        allowEditing: false,
+        resultType: CameraResultType.DataUrl,
+      });
+      if (!photo.dataUrl) {
+        throw new Error('La photo n’a pas pu être récupérée.');
+      }
+      this.photoDataUrl = photo.dataUrl;
+    } catch (error) {
+      this.errorMessage = error instanceof Error ? error.message : 'Impossible de prendre la photo.';
+    }
+  }
 
   constructor(
     private readonly auth: Auth,
@@ -59,9 +78,10 @@ export class RegisterPage {
       !this.lastName.trim() ||
       !this.age ||
       !this.email.trim() ||
-      !this.password
+      !this.password ||
+      !this.photoDataUrl
     ) {
-      this.errorMessage = 'Veuillez remplir tous les champs.';
+      this.errorMessage = 'Veuillez remplir tous les champs et prendre une photo.';
       return;
     }
 
@@ -88,6 +108,7 @@ export class RegisterPage {
         age: this.age,
         email: this.email,
         password: this.password,
+        photoDataUrl: this.photoDataUrl,
       });
       await this.router.navigateByUrl('/home', { replaceUrl: true });
     } catch (error) {

@@ -13,6 +13,9 @@
     <ion-text color="danger"><p>{{ errorMessage() }}</p></ion-text>
     <ion-button routerLink="/home">Retour</ion-button>
   } @else if (profile(); as p) {
+    @if (p.photoUrl) {
+      <img class="profile-photo" [src]="p.photoUrl" alt="Photo de profil" />
+    }
     <ion-card>
       <ion-card-content>
         <ion-item><ion-label>Prénom : {{ p.firstName }}</ion-label></ion-item>

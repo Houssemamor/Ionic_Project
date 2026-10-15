@@ -33,6 +33,11 @@ export const routes: Routes = [
     canActivate: [authGuard, activeUserGuard]
   },
   {
+    path: 'movie-details/:id',
+    loadComponent: () => import('./pages/movie-details/movie-details.page').then((m) => m.MovieDetailsPage),
+    canActivate: [authGuard, activeUserGuard],
+  },
+  {
     path: 'favorites',
     loadComponent: () => import('./pages/favorites/favorites.page').then( m => m.FavoritesPage),
     canActivate: [authGuard, activeUserGuard]

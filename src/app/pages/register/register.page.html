@@ -39,6 +39,13 @@
       <ion-input name="confirmPassword" type="password" [(ngModel)]="confirmPassword" autocomplete="new-password" required />
     </ion-item>
 
+    <ion-button expand="block" type="button" fill="outline" (click)="takePhoto()">
+      {{ photoDataUrl ? 'Reprendre la photo' : 'Prendre une photo' }}
+    </ion-button>
+    @if (photoDataUrl) {
+      <img class="photo-preview" [src]="photoDataUrl" alt="Aperçu de la photo de profil" />
+    }
+
     <ion-text color="danger" *ngIf="errorMessage">
       <p class="error-message">{{ errorMessage }}</p>
     </ion-text>

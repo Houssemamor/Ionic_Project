@@ -1,13 +1,43 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>movies</ion-title>
+    <ion-title>Films MovieDB</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">movies</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <ion-searchbar
+    placeholder="Rechercher un film"
+    [value]="search()"
+    (ionInput)="search.set($any($event).detail.value ?? '')"
+    (keyup.enter)="searchMovies()">
+  </ion-searchbar>
+  <ion-button expand="block" (click)="searchMovies()" [disabled]="isSearching()">Rechercher</ion-button>
+
+  @if (errorMessage()) {
+    <ion-text color="danger"><p>{{ errorMessage() }}</p></ion-text>
+  }
+
+  @if (isLoading() || isSearching()) {
+    <div class="ion-text-center ion-padding"><ion-spinner></ion-spinner></div>
+  } @else {
+    <div class="movie-grid">
+      @for (movie of movies(); track movie.id) {
+        <ion-card>
+<img [src]="movie.posterPath" [alt]="movie.title" />          <ion-card-content>
+            <ion-card-title>{{ movie.title }}</ion-card-title>
+            <ion-button size="small" fill="outline" [routerLink]="['/movie-details', movie.id]">
+              Détails
+            </ion-button>
+            <ion-button size="small"
+              [color]="favoriteIds().has('' + movie.id) ? 'danger' : 'medium'"
+              (click)="toggleFavorite(movie)">
+              {{ favoriteIds().has('' + movie.id) ? '♥ Retirer' : '♡ Favori' }}
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      } @empty {
+        <ion-text><p>Aucun film trouvé.</p></ion-text>
+      }
+    </div>
+  }
 </ion-content>

@@ -24,3 +24,11 @@
   text-align: center;
   margin-top: 24px;
 }
+.photo-preview {
+  display: block;
+  width: 140px;
+  height: 140px;
+  margin: 1rem auto;
+  border-radius: 50%;
+  object-fit: cover;
+}

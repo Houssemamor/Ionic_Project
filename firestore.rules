@@ -13,7 +13,7 @@ service cloud.firestore {
 
     match /users/{uid} {
       // un utilisateur lit son profil ; l'admin lit tout
-      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow read: if isSignedIn();
 
       // à l'inscription : uniquement son propre doc, role 'user', actif
       allow create: if isSignedIn()
@@ -36,6 +36,14 @@ service cloud.firestore {
     match /movies/{movieId} {
       allow read: if isSignedIn();
       allow write: if isAdmin();
+    }
+
+    match /favorites/{favoriteId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid;
+      allow delete: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
     }
   }
 }

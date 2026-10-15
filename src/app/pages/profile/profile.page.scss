@@ -66,3 +66,11 @@ ion-label span {
 .error-message {
   text-align: center;
 }
+.profile-photo {
+  display: block;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
