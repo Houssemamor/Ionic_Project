@@ -1,76 +1,123 @@
-.profile-container {
-  max-width: 620px;
-  margin: 0 auto;
-  padding: 24px 16px;
+// Profil : identite, informations, preferences puis compte. Les couleurs
+// viennent des variables Ionic pour rester lisibles en theme sombre.
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+  color: var(--ion-color-primary-contrast);
+  box-shadow: 0 10px 24px rgb(0 0 0 / 18%);
 }
 
-.profile-container > ion-spinner {
-  display: block;
-  margin: 48px auto;
-}
-
-.profile-container ion-card {
-  margin: 0;
-}
-
-.profile-avatar,
-.profile-photo {
-  width: 96px;
-  height: 96px;
-  margin: 8px auto 16px;
+.avatar {
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  border: 2px solid rgb(255 255 255 / 60%);
   border-radius: 50%;
+  object-fit: cover;
 }
 
-.profile-avatar {
+.avatar-initials {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--ion-color-primary);
-  color: var(--ion-color-primary-contrast);
-  font-size: 40px;
+  background: rgb(255 255 255 / 18%);
+  font-size: 1.4rem;
   font-weight: 600;
 }
 
-.profile-photo {
-  display: block;
-  object-fit: cover;
+.identity-text {
+  min-width: 0;
+
+  h1 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
 }
 
-h1,
-.role {
-  text-align: center;
+.email {
+  margin: 2px 0 6px;
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+  opacity: 0.9;
 }
 
-.role {
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 20%);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.chip-inactive {
+  background: rgb(0 0 0 / 25%);
+}
+
+ion-card {
+  margin: 16px 0;
+}
+
+ion-card-content h2 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.info-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--ion-color-light-shade);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.info-label {
   color: var(--ion-color-medium);
+  font-size: 0.85rem;
 }
 
-ion-item {
+.info-value {
+  overflow-wrap: anywhere;
+  font-weight: 500;
+  text-align: right;
+}
+
+.preference-item {
   --padding-start: 0;
+  --inner-padding-end: 0;
 }
 
-ion-label span {
-  display: block;
-}
-
-.field-label {
-  margin-bottom: 4px;
+.hint {
+  margin: 6px 0 0;
   color: var(--ion-color-medium);
-  font-size: 13px;
+  font-size: 0.78rem;
 }
 
-.profile-container ion-button {
-  margin: 24px 0 0;
+.logout-label {
+  margin-left: 8px;
 }
 
-.error-message {
+.loading {
+  padding-top: 3rem;
   text-align: center;
-}
-.profile-photo {
-  display: block;
-  width: 150px;
-  height: 150px;
-  margin: 0 auto 1rem;
-  border-radius: 50%;
-  object-fit: cover;
+
+  p {
+    color: var(--ion-color-medium);
+  }
 }

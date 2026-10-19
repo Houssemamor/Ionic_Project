@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { addDoc, collection, deleteDoc, doc, getDocs, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
 import { Movie as MovieModel } from '../models/movie.model';
+import { TranslationService } from '../i18n/translation.service';
 
 // Limite le temps d'attente afin d'éviter un écran bloqué indéfiniment.
 const MOVIES_REQUEST_TIMEOUT_MS = 10000;
@@ -12,6 +13,7 @@ const MOVIES_REQUEST_TIMEOUT_MS = 10000;
 export class Movie {
   // Accès partagé à l'instance Firestore configurée dans FirebaseService.
   private readonly firebase = inject(FirebaseService);
+  private readonly i18n = inject(TranslationService);
 
   // Retourne tous les films stockés dans la collection Firestore "movies".
   async list(): Promise<MovieModel[]> {
@@ -21,7 +23,7 @@ export class Movie {
       const moviesRequest = getDocs(collection(this.firebase.firestore, 'movies'));
       const timeout = new Promise<never>((_, reject) => {
         timeoutId = window.setTimeout(() => {
-          reject(new Error('Le chargement des films a expiré. Vérifiez votre connexion et les règles Firestore.'));
+          reject(new Error(this.i18n.t('errors.moviesLoadTimeout')));
         }, MOVIES_REQUEST_TIMEOUT_MS);
       });
 

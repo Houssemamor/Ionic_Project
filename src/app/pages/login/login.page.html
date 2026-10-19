@@ -1,16 +1,16 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Connexion</ion-title>
+    <ion-title>{{ 'login.title' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <form class="auth-form" (ngSubmit)="submit()">
-    <h1>Bienvenue</h1>
-    <p>Connectez-vous pour gérer vos films favoris.</p>
+    <h1>{{ 'login.heading' | translate }}</h1>
+    <p>{{ 'login.subtitle' | translate }}</p>
 
     <ion-item>
-      <ion-label position="stacked">E-mail</ion-label>
+      <ion-label position="stacked">{{ 'common.email' | translate }}</ion-label>
       <ion-input
         name="email"
         type="email"
@@ -21,7 +21,7 @@
     </ion-item>
 
     <ion-item>
-      <ion-label position="stacked">Mot de passe</ion-label>
+      <ion-label position="stacked">{{ 'common.password' | translate }}</ion-label>
       <ion-input
         name="password"
         type="password"
@@ -31,18 +31,24 @@
       />
     </ion-item>
 
-    <ion-text color="danger" *ngIf="errorMessage">
-      <p class="error-message">{{ errorMessage }}</p>
+    <ion-text color="danger">
+      @if (errorMessage) {
+        <p class="error-message">{{ errorMessage }}</p>
+      }
     </ion-text>
 
     <ion-button expand="block" type="submit" [disabled]="isSubmitting">
-      <ion-spinner *ngIf="isSubmitting" name="crescent" />
-      <span *ngIf="!isSubmitting">Se connecter</span>
+      @if (isSubmitting) {
+        <ion-spinner name="crescent" />
+      }
+      @if (!isSubmitting) {
+        <span>{{ 'login.submit' | translate }}</span>
+      }
     </ion-button>
 
     <p class="link-line">
-      Vous n'avez pas encore de compte ?
-      <a routerLink="/register">Créer un compte</a>
+      {{ 'login.noAccount' | translate }}
+      <a routerLink="/register">{{ 'login.createAccount' | translate }}</a>
     </p>
   </form>
 </ion-content>

@@ -1,19 +1,16 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component } from '@angular/core';
 import { IonBackButton, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
-  imports: [IonBackButton, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
+  imports: [
+    IonBackButton, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar,
+    TranslatePipe,
+  ],
 })
-export class DashboardPage implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
+export class DashboardPage {
+  // Page statique : tout le contenu est fourni par le template.
 }

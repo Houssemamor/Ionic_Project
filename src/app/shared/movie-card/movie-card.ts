@@ -5,6 +5,8 @@ import { addIcons } from 'ionicons';
 import { heart, heartOutline, informationCircleOutline, star, trashOutline } from 'ionicons/icons';
 import { Movie } from '../../models/movie.model';
 import { ViewMode } from '../../services/view-preference';
+import { TranslationService } from '../../i18n/translation.service';
+import { TranslatePipe } from '../../i18n/translate.pipe';
 
 // Les SVG ne sont pas embarques automatiquement : ion-icon ne resout que les
 // icones enregistrees ici, sinon il tente un chargement d'asset qui echoue.
@@ -24,9 +26,9 @@ const LONG_PRESS_MS = 500;
   selector: 'app-movie-card',
   templateUrl: './movie-card.html',
   styleUrls: ['./movie-card.scss'],
-  imports: [IonButton, IonCard, IonIcon],
+  imports: [IonButton, IonCard, IonIcon, TranslatePipe],
 })
-export class MovieCard {
+export class MovieCardComponent {
   readonly movie = input.required<Movie>();
   readonly view = input.required<ViewMode>();
 
@@ -40,6 +42,7 @@ export class MovieCard {
   readonly actionToggled = output<Movie>();
 
   private readonly router = inject(Router);
+  private readonly i18n = inject(TranslationService);
   private pressTimeout: number | undefined;
 
   /** Année extraite de la date de sortie, premiere annee du format ISO. */
@@ -62,13 +65,17 @@ export class MovieCard {
   });
 
   /** Libelle complet de la note, lu par les lecteurs d'ecran. */
-  readonly ratingLabel = computed(() => `Note : ${this.rating()} sur 10`);
+  readonly ratingLabel = computed(() =>
+    this.i18n.t('card.ratingLabel', { value: this.rating() }),
+  );
 
   readonly actionLabel = computed(() => {
     if (this.favoriteAction() === 'remove') {
-      return 'Retirer';
+      return this.i18n.t('card.remove');
     }
-    return this.isFavorite() ? '♥ Retirer' : '♡ Favori';
+    return this.isFavorite()
+      ? this.i18n.t('card.favoriteRemove')
+      : this.i18n.t('card.favoriteAdd');
   });
 
   /** Nom d'icone ionicons correspondant a l'action, pour les boutons compacts du mode liste. */

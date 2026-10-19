@@ -52,7 +52,7 @@
   <!-- Element separe pour les actions : jamais declencheur d'appui long. -->
   <div class="card-actions" (pointerdown)="$event.stopPropagation()">
     @if (view() === 'grid') {
-      <ion-button size="small" fill="outline" (click)="openDetails()">Détails</ion-button>
+      <ion-button size="small" fill="outline" (click)="openDetails()">{{ 'card.details' | translate }}</ion-button>
       <ion-button size="small" [color]="actionColor()" (click)="actionToggled.emit(movie())">
         {{ actionLabel() }}
       </ion-button>
@@ -62,8 +62,8 @@
       <button
         type="button"
         class="icon-button"
-        aria-label="Voir les détails"
-        title="Voir les détails"
+        [attr.aria-label]="'card.detailsAria' | translate"
+        [title]="'card.detailsAria' | translate"
         (click)="openDetails()">
         <ion-icon name="information-circle-outline"></ion-icon>
       </button>

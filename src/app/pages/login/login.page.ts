@@ -1,5 +1,4 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import {
@@ -15,6 +14,8 @@ import {
   IonToolbar,
 } from '@ionic/angular';
 import { Auth } from '../../services/auth';
+import { TranslationService } from '../../i18n/translation.service';
+import { TranslatePipe } from '../../i18n/translate.pipe';
 
 @Component({
   selector: 'app-login',
@@ -31,27 +32,26 @@ import { Auth } from '../../services/auth';
     IonText,
     IonTitle,
     IonToolbar,
-    CommonModule,
     FormsModule,
     RouterLink,
+    TranslatePipe,
   ],
 })
 export class LoginPage {
+  private readonly auth = inject(Auth);
+  private readonly router = inject(Router);
+  private readonly i18n = inject(TranslationService);
+
   email = '';
   password = '';
   errorMessage = '';
   isSubmitting = false;
 
-  constructor(
-    private readonly auth: Auth,
-    private readonly router: Router,
-  ) {}
-
   async submit(): Promise<void> {
     this.errorMessage = '';
 
     if (!this.email.trim() || !this.password) {
-      this.errorMessage = 'Veuillez renseigner votre e-mail et votre mot de passe.';
+      this.errorMessage = this.i18n.t('errors.loginMissing');
       return;
     }
 
@@ -75,13 +75,19 @@ export class LoginPage {
       case 'auth/invalid-credential':
       case 'auth/user-not-found':
       case 'auth/wrong-password':
-        return 'E-mail ou mot de passe incorrect.';
+        return this.i18n.t('errors.invalidCredentials');
       case 'auth/invalid-email':
-        return 'L’adresse e-mail est invalide.';
+        return this.i18n.t('errors.invalidEmail');
       case 'auth/too-many-requests':
-        return 'Trop de tentatives. Réessayez plus tard.';
+        return this.i18n.t('errors.tooManyRequests');
+      case 'auth/account-disabled':
+      case 'auth/user-disabled':
+        return this.i18n.t('errors.accountDisabled');
       default:
-        return error instanceof Error ? error.message : 'La connexion a échoué.';
+        // Le message brut de Firebase est en anglais : on journalise la cause
+        // technique et on n'affiche que le texte traduit.
+        console.error('Erreur Firebase connexion :', error);
+        return this.i18n.t('errors.loginFailed');
     }
   }
 }

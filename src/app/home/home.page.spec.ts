@@ -1,22 +1,129 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 
 import { HomePage } from './home.page';
+import { Auth } from '../services/auth';
+import { Favorite } from '../services/favorite';
+import { TmdbService } from '../services/tmdb.service';
+import { TranslationService } from '../i18n/translation.service';
+import { Favorite as FavoriteModel } from '../models/favorite.model';
+import { UserProfile } from '../models/user.model';
+import { Movie } from '../models/movie.model';
 
 describe('HomePage', () => {
   let component: HomePage;
   let fixture: ComponentFixture<HomePage>;
+  let profile: UserProfile;
+  let favorites: FavoriteModel[];
+  let getCurrentProfile: ReturnType<typeof vi.fn>;
+  let listFavorites: ReturnType<typeof vi.fn>;
+  let recommend: ReturnType<typeof vi.fn>;
 
-  beforeEach(async () => {
+  const recommended: Movie[] = [
+    {
+      id: 'tmdb-1', title: 'Premier film', overview: '', posterPath: 'poster-1.jpg', voteAverage: 8.2,
+    },
+    {
+      id: 'tmdb-2', title: 'Deuxieme film', overview: '', posterPath: 'poster-2.jpg', voteAverage: 7.1,
+    },
+  ];
+
+  beforeEach(() => {
+    localStorage.clear();
+    profile = {
+      id: 'user-1',
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+      age: 36,
+      email: 'ada@example.com',
+      role: 'user',
+      active: true,
+    };
+    favorites = [
+      { id: 'fav-1', tmdbId: 10, title: 'Favori', overview: '', genres: ['Action'] },
+    ];
+    getCurrentProfile = vi.fn().mockImplementation(() => Promise.resolve(profile));
+    listFavorites = vi.fn().mockImplementation(() => Promise.resolve(favorites));
+    recommend = vi.fn().mockResolvedValue({ genreName: 'Action', movies: recommended });
+
     TestBed.configureTestingModule({
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        {
+          provide: Auth,
+          useValue: {
+            waitForAuthState: () => Promise.resolve({ uid: 'user-1' }),
+            getCurrentProfile,
+          },
+        },
+        { provide: Favorite, useValue: { list: listFavorites } },
+        { provide: TmdbService, useValue: { recommend } },
+      ],
     });
     fixture = TestBed.createComponent(HomePage);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
+
+  /** ngOnInit est asynchrone : on attend les services avant de rendre le DOM. */
+  async function init(): Promise<void> {
+    await component.ngOnInit();
+    fixture.detectChanges();
+  }
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('affiche le bloc identite et le lien vers le profil', async () => {
+    await init();
+
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector('.greeting')?.textContent).toContain('Bonjour Ada');
+    expect(element.querySelector('.identity')?.getAttribute('href')).toBe('/profile');
+    expect(element.querySelectorAll('.tile').length).toBe(3);
+  });
+
+  it('affiche trois recommandations basees sur le genre dominant', async () => {
+    await init();
+
+    expect(recommend).toHaveBeenCalledWith(['Action'], [10], 3);
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector('.recommendations h2')?.textContent).toContain('Recommandé pour vous');
+    expect(element.querySelector('.reason')?.textContent).toContain('Action');
+    expect(element.querySelectorAll('.recommendation').length).toBe(2);
+  });
+
+  it('masque les recommandations sans favori et n appelle pas TMDB', async () => {
+    favorites = [];
+    recommend.mockResolvedValue({ genreName: '', movies: [] });
+
+    await init();
+
+    expect(recommend).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.querySelector('.recommendations')).toBeNull();
+  });
+
+  it('affiche les raccourcis administrateur et aucun bouton de deconnexion', async () => {
+    profile = { ...profile, role: 'admin' };
+
+    await init();
+
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelectorAll('.tile').length).toBe(3);
+    expect(element.querySelector('.identity .chip')?.textContent).toContain('Administrateur');
+    expect(element.textContent).not.toContain('Se déconnecter');
+  });
+
+  it('traduit l accueil lorsque la langue globale passe a l anglais', async () => {
+    await init();
+
+    TestBed.inject(TranslationService).setLanguage('en');
+    fixture.detectChanges();
+
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector('ion-title')?.textContent).toContain('Home');
+    expect(element.querySelector('.recommendations h2')?.textContent).toContain('Recommended for you');
+    expect(element.querySelector('.greeting')?.textContent).toContain('Hello Ada');
   });
 });

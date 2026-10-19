@@ -1,30 +1,32 @@
-// Importe les fonctionnalités Angular nécessaires à la page.
+// Importe les fonctionnalites Angular necessaires a la page.
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-// Importe les composants visuels Ionic utilisés dans le template HTML.
+// Importe les composants visuels Ionic utilises dans le template HTML.
 import { IonBackButton, IonButtons, IonButton, IonContent, IonHeader, IonInput, IonItem, IonLabel, IonList, IonSelect, IonSelectOption, IonText, IonTitle, IonToolbar } from '@ionic/angular';
 
-// Movie est le service d'accès à Firestore ; MovieModel décrit la forme d'un film.
+// Movie est le service d'acces a Firestore ; MovieModel decrit la forme d'un film.
 import { Movie } from '../../../services/movie';
 import { Movie as MovieModel } from '../../../models/movie.model';
+import { TranslationService } from '../../../i18n/translation.service';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 
-// Déclare la page autonome de gestion des films administrateur.
+// Declare la page autonome de gestion des films administrateur.
 @Component({
-  // Nom utilisé par Angular pour identifier ce composant.
+  // Nom utilise par Angular pour identifier ce composant.
   selector: 'app-movies',
   // Fichiers contenant respectivement la structure HTML et les styles de la page.
   templateUrl: './movies.page.html',
   styleUrls: ['./movies.page.scss'],
   // Composants et modules utilisables dans le template.
-  imports: [IonBackButton, IonButtons, IonButton, IonContent, IonHeader, IonInput, IonItem, IonLabel, IonList, IonSelect, IonSelectOption, IonText, IonTitle, IonToolbar, CommonModule, FormsModule]
+  imports: [IonBackButton, IonButtons, IonButton, IonContent, IonHeader, IonInput, IonItem, IonLabel, IonList, IonSelect, IonSelectOption, IonText, IonTitle, IonToolbar, FormsModule, TranslatePipe]
 })
 export class MoviesPage implements OnInit {
-  // Injecte le service responsable des opérations Firestore sur les films.
+  // Injecte le service responsable des operations Firestore sur les films.
   private readonly movieService = inject(Movie);
+  private readonly i18n = inject(TranslationService);
 
-  // Liste des films affichés dans la page.
+  // Liste des films affiches dans la page.
   movies: MovieModel[] = [];
 
   // Valeurs saisies dans le formulaire d'ajout.
@@ -34,50 +36,50 @@ export class MoviesPage implements OnInit {
   posterPath = '';
   genresText = '';
 
-  // Identifiant du film choisi dans la liste déroulante de suppression.
+  // Identifiant du film choisi dans la liste deroulante de suppression.
   selectedMovieId = '';
 
-  // États utilisés pour afficher les chargements et désactiver les actions concurrentes.
+  // Etats utilises pour afficher les chargements et desactiver les actions concurrentes.
   isLoading = true;
   isSaving = false;
   isDeletingMovieId: string | null = null;
 
-  // Messages affichés à l'utilisateur après une opération.
+  // Messages affiches a l'utilisateur apres une operation.
   errorMessage = '';
   successMessage = '';
 
-  // Charge les films dès l'ouverture de la page.
+  // Charge les films des l'ouverture de la page.
   async ngOnInit(): Promise<void> {
     await this.loadMovies();
   }
 
-  // Récupère les films depuis Firestore et gère l'état de chargement.
+  // Recupere les films depuis Firestore et gere l'etat de chargement.
   async loadMovies(): Promise<void> {
     this.isLoading = true;
     this.errorMessage = '';
     try {
       this.movies = await this.movieService.list();
     } catch (error) {
-      // Conserve l'erreur dans la console et affiche un message compréhensible.
+      // Conserve l'erreur dans la console et affiche un message traduit.
       console.error('Erreur chargement films admin :', error);
-      this.errorMessage = error instanceof Error ? error.message : 'Impossible de charger les films.';
+      this.errorMessage = this.i18n.t('errors.moviesLoad');
     } finally {
       this.isLoading = false;
     }
   }
 
-  // Valide le formulaire puis crée un nouveau film dans Firestore.
+  // Valide le formulaire puis cree un nouveau film dans Firestore.
   async addMovie(): Promise<void> {
     // Le titre et le synopsis sont les deux champs obligatoires.
     if (!this.title.trim() || !this.overview.trim()) {
-      this.errorMessage = 'Le titre et le synopsis sont obligatoires.';
+      this.errorMessage = this.i18n.t('errors.movieRequired');
       return;
     }
     this.isSaving = true;
     this.errorMessage = '';
     this.successMessage = '';
     try {
-      // Prépare les données en supprimant les espaces inutiles.
+      // Prepare les donnees en supprimant les espaces inutiles.
       const movie = await this.movieService.create({
         title: this.title.trim(),
         overview: this.overview.trim(),
@@ -86,31 +88,31 @@ export class MoviesPage implements OnInit {
         genres: this.genresText.split(',').map((genre) => genre.trim()).filter(Boolean),
       });
 
-      // Ajoute le nouveau film en tête de la liste sans recharger la page.
+      // Ajoute le nouveau film en tete de la liste sans recharger la page.
       this.movies = [movie, ...this.movies];
 
-      // Réinitialise le formulaire après une création réussie.
+      // Reinitialise le formulaire apres une creation reussie.
       this.title = '';
       this.overview = '';
       this.releaseDate = '';
       this.posterPath = '';
       this.genresText = '';
 
-      // Informe l'administrateur que l'opération a réussi.
-      this.successMessage = `Le film « ${movie.title } » a été ajouté avec succès.`;
+      // Informe l'administrateur que l'operation a reussi.
+      this.successMessage = this.i18n.t('admin.movieAdded', { title: movie.title });
     } catch (error) {
-      // Affiche l'erreur technique dans la console et l'erreur fonctionnelle à l'écran.
+      // Affiche l'erreur technique dans la console et le message traduit a l'ecran.
       console.error('Erreur ajout film admin :', error);
-      this.errorMessage = error instanceof Error ? error.message : 'Impossible d’ajouter le film.';
+      this.errorMessage = this.i18n.t('errors.movieAdd');
     } finally {
       this.isSaving = false;
     }
   }
 
-  // Supprime un film après confirmation explicite de l'administrateur.
+  // Supprime un film apres confirmation explicite de l'administrateur.
   async deleteMovie(movie: MovieModel): Promise<void> {
-    // Évite une suppression accidentelle.
-    if (!window.confirm(`Voulez-vous vraiment supprimer le film « ${movie.title} » ?`)) {
+    // Evite une suppression accidentelle.
+    if (!window.confirm(this.i18n.t('admin.confirmDelete', { title: movie.title }))) {
       return;
     }
 
@@ -124,22 +126,22 @@ export class MoviesPage implements OnInit {
       // Retire aussi le film de l'affichage local.
       this.movies = this.movies.filter((item) => item.id !== movie.id);
       if (this.selectedMovieId === movie.id) {
-        // Réinitialise la sélection si le film supprimé était sélectionné.
+        // Reinitialise la selection si le film supprime etait selectionne.
         this.selectedMovieId = '';
       }
 
-      // Informe l'administrateur que la suppression est terminée.
-      this.successMessage = `Le film « ${movie.title} » a été supprimé avec succès.`;
+      // Informe l'administrateur que la suppression est terminee.
+      this.successMessage = this.i18n.t('admin.movieDeleted', { title: movie.title });
     } catch (error) {
-      // Signale explicitement l'échec de la suppression.
+      // Signale explicitement l'echec de la suppression.
       console.error('Erreur suppression film admin :', error);
-      this.errorMessage = error instanceof Error ? error.message : 'Impossible de supprimer le film.';
+      this.errorMessage = this.i18n.t('errors.movieDelete');
     } finally {
       this.isDeletingMovieId = null;
     }
   }
 
-  // Transforme la suppression depuis la liste déroulante en appel de deleteMovie.
+  // Transforme la suppression depuis la liste deroulante en appel de deleteMovie.
   async deleteSelectedMovie(): Promise<void> {
     const movie = this.movies.find((item) => item.id === this.selectedMovieId);
     if (movie) {

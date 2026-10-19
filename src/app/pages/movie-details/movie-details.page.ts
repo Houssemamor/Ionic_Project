@@ -4,6 +4,8 @@ import { Favorite } from '../../services/favorite';
 import { Movie } from '../../models/movie.model';
 import { TmdbService } from '../../services/tmdb.service';
 import { Movie as FirestoreMovie } from '../../services/movie';
+import { TranslationService } from '../../i18n/translation.service';
+import { TranslatePipe } from '../../i18n/translate.pipe';
 import {
   IonBackButton, IonButtons,
   IonButton, IonCard, IonCardContent, IonCardTitle, IonContent,
@@ -16,7 +18,7 @@ import {
   styleUrls: ['./movie-details.page.scss'],
   imports: [
     IonBackButton, IonButtons, IonButton, IonCard, IonCardContent, IonCardTitle, IonContent,
-    IonHeader, IonSpinner, IonText, IonTitle, IonToolbar,
+    IonHeader, IonSpinner, IonText, IonTitle, IonToolbar, TranslatePipe,
   ],
 })
 export class MovieDetailsPage implements OnInit {
@@ -24,6 +26,7 @@ export class MovieDetailsPage implements OnInit {
   private readonly router = inject(Router);
   private readonly favorites = inject(Favorite);
   private readonly firestoreMovies = inject(FirestoreMovie);
+  private readonly i18n = inject(TranslationService);
   readonly tmdb = inject(TmdbService);
 
   movie = signal<Movie | null>(null);
@@ -41,7 +44,7 @@ export class MovieDetailsPage implements OnInit {
       } else {
         const storedMovie = await this.firestoreMovies.get(rawId);
         if (!storedMovie) {
-          throw new Error('Film introuvable dans la base de données.');
+          throw new Error(this.i18n.t('errors.movieNotFoundDb'));
         }
         movie = storedMovie;
       }
@@ -54,10 +57,8 @@ export class MovieDetailsPage implements OnInit {
         console.error('Erreur favoris :', error);
       }
     } catch (error) {
-      console.error('Erreur détails :', error);
-      this.errorMessage.set(
-        error instanceof Error ? error.message : 'Impossible de charger le film.'
-      );
+      console.error('Erreur details :', error);
+      this.errorMessage.set(this.i18n.t('errors.detailsLoad'));
     } finally {
       this.isLoading.set(false);
     }
@@ -65,7 +66,9 @@ export class MovieDetailsPage implements OnInit {
 
   async toggleFavorite(): Promise<void> {
     const movie = this.movie();
-    if (!movie) return;
+    if (!movie) {
+      return;
+    }
     this.errorMessage.set('');
     try {
       if (this.isFavorite()) {
@@ -77,9 +80,7 @@ export class MovieDetailsPage implements OnInit {
       }
     } catch (error) {
       console.error('Erreur favori :', error);
-      this.errorMessage.set(
-        error instanceof Error ? error.message : 'Impossible de modifier les favoris.'
-      );
+      this.errorMessage.set(this.i18n.t('errors.favoriteToggle'));
     }
   }
 

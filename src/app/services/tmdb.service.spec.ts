@@ -2,11 +2,12 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TmdbService } from './tmdb.service';
-import { writeMovieLanguage } from './language-preference';
+import { TranslationService } from '../i18n/translation.service';
 
 describe('TmdbService language', () => {
   let service: TmdbService;
   let http: HttpTestingController;
+  let i18n: TranslationService;
 
   beforeEach(() => {
     localStorage.clear();
@@ -14,6 +15,7 @@ describe('TmdbService language', () => {
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
     service = TestBed.inject(TmdbService);
+    i18n = TestBed.inject(TranslationService);
     http = TestBed.inject(HttpTestingController);
   });
 
@@ -23,7 +25,7 @@ describe('TmdbService language', () => {
   });
 
   it('envoie la langue choisie pour la recherche et pour les genres', async () => {
-    writeMovieLanguage('en');
+    i18n.setLanguage('en');
 
     const promise = service.search('matrix');
     const searchRequest = http.expectOne((request) => request.url.endsWith('/search/movie'));
@@ -41,7 +43,7 @@ describe('TmdbService language', () => {
   });
 
   it('met en cache les genres par langue', async () => {
-    writeMovieLanguage('fr');
+    i18n.setLanguage('fr');
     const french = service.popular();
     http.expectOne((request) => request.url.endsWith('/movie/popular')).flush({ results: [] });
     await nextTask();
@@ -52,7 +54,7 @@ describe('TmdbService language', () => {
 
     // Changer de langue doit recharger les noms : le cache francais ne doit pas
     // repondre a un appel anglais.
-    writeMovieLanguage('en');
+    i18n.setLanguage('en');
     const english = service.popular();
     http.expectOne((request) => request.url.endsWith('/movie/popular')).flush({ results: [] });
     await nextTask();
@@ -61,9 +63,64 @@ describe('TmdbService language', () => {
     englishGenres.flush({ genres: [{ id: 28, name: 'Action' }] });
     await english;
   });
+
+  it('recommande selon le genre le plus frequent et exclut les favoris', async () => {
+    i18n.setLanguage('en');
+    const promise = service.recommend(['Science-Fiction'], [10], 3);
+
+    // Les deux langues sont chargees : les favoris enregistres avant un
+    // changement de langue restent donc reconnus.
+    const genreRequests = http.match((request) => request.url.endsWith('/genre/movie/list'));
+    expect(genreRequests.length).toBe(2);
+    const frenchGenres = genreRequests.find(
+      (request) => request.request.params.get('language') === 'fr-FR',
+    );
+    const englishGenres = genreRequests.find(
+      (request) => request.request.params.get('language') === 'en-US',
+    );
+    expect(frenchGenres).toBeTruthy();
+    expect(englishGenres).toBeTruthy();
+    frenchGenres!.flush({ genres: [{ id: 878, name: 'Science-Fiction' }] });
+    englishGenres!.flush({ genres: [{ id: 878, name: 'Science Fiction' }] });
+    await nextTask();
+
+    const discover = http.expectOne((request) => request.url.endsWith('/discover/movie'));
+    expect(discover.request.params.get('with_genres')).toBe('878');
+    expect(discover.request.params.get('language')).toBe('en-US');
+    discover.flush({
+      results: [
+        tmdbMovie(10), tmdbMovie(11), tmdbMovie(12), tmdbMovie(13),
+      ],
+    });
+
+    const result = await promise;
+
+    expect(result.genreName).toBe('Science Fiction');
+    // Le favori 10 est exclu et la limite de trois films est respectee.
+    expect(result.movies.map((movie) => movie.tmdbId)).toEqual([11, 12, 13]);
+  });
+
+  it('ne requete rien sans genre de favori', async () => {
+    const result = await service.recommend([]);
+
+    expect(result).toEqual({ genreName: '', movies: [] });
+    http.expectNone(() => true);
+  });
 });
 
 /** Laisse le service poursuivre apres une reponse HTTP (resolution de promesse). */
 function nextTask(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve));
+}
+
+/** Fabrique une reponse TMDB minimale. */
+function tmdbMovie(id: number) {
+  return {
+    id,
+    title: `Film ${id}`,
+    overview: '',
+    poster_path: null,
+    release_date: '2024-01-01',
+    vote_average: 7,
+  };
 }

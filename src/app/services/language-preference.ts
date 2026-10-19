@@ -1,12 +1,11 @@
-// Langue demandee a TMDB pour les titres, synopsis et genres. La preference
-// est globale a l'application : toutes les pages lisent la meme valeur, et le
-// choix survit au rechargement du navigateur.
+// Langue de l'application : interface, messages et metadonnees TMDB. Elle est
+// globale et conservee sur l'appareil, comme le mode d'affichage.
 const LANGUAGE_STORAGE_KEY = 'movieDataLanguage';
 
-export type MovieLanguage = 'fr' | 'en';
+export type AppLanguage = 'fr' | 'en';
 
 /** Relit la langue enregistree, 'fr' par defaut si rien n'est stocke ou si le stockage est indisponible. */
-export function readMovieLanguage(): MovieLanguage {
+export function readAppLanguage(): AppLanguage {
   try {
     return localStorage.getItem(LANGUAGE_STORAGE_KEY) === 'en' ? 'en' : 'fr';
   } catch {
@@ -16,7 +15,7 @@ export function readMovieLanguage(): MovieLanguage {
 }
 
 /** Memorise la langue choisie. Un echec de stockage n'interrompt pas l'interface. */
-export function writeMovieLanguage(language: MovieLanguage): void {
+export function writeAppLanguage(language: AppLanguage): void {
   try {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
   } catch {

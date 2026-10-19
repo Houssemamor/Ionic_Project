@@ -25,6 +25,7 @@ describe('ProfilePage', () => {
               role: 'user',
               active: true,
             }),
+            logout: () => Promise.resolve(),
           },
         },
       ],
@@ -38,13 +39,29 @@ describe('ProfilePage', () => {
     expect(component).toBeTruthy();
   });
 
-  it('memorise la langue des films choisie dans le profil', () => {
-    expect(component.language()).toBe('fr');
+  it('memorise la langue globale choisie dans le profil', () => {
+    expect(component.i18n.language()).toBe('fr');
 
     component.changeLanguage('en');
 
-    expect(component.language()).toBe('en');
+    expect(component.i18n.language()).toBe('en');
+    expect(component.i18n.t('profile.title')).toBe('My profile');
     expect(localStorage.getItem('movieDataLanguage')).toBe('en');
+    expect(document.documentElement.lang).toBe('en');
+  });
+
+  it('traduit toute la page apres un changement de langue', async () => {
+    await component.ngOnInit();
+    fixture.detectChanges();
+
+    component.changeLanguage('en');
+    fixture.detectChanges();
+
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector('ion-title')?.textContent).toContain('My profile');
+    expect(element.textContent).toContain('Information');
+    expect(element.textContent).toContain('Sign out');
+    expect(element.textContent).toContain('Ada Lovelace');
   });
 
   it('loads the authenticated user profile after auth state restoration', async () => {
@@ -53,6 +70,13 @@ describe('ProfilePage', () => {
     expect(component.profile()?.email).toBe('ada@example.com');
     expect(component.isLoading()).toBe(false);
     expect(component.errorMessage()).toBe('');
+  });
+
+  it('affiche les initiales lorsque le profil na pas de photo', async () => {
+    await component.ngOnInit();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.avatar-initials')?.textContent).toContain('AL');
   });
 
   it('stops loading and shows an error when no user is authenticated', async () => {
@@ -77,5 +101,29 @@ describe('ProfilePage', () => {
     expect(unauthenticatedPage.profile()).toBeNull();
     expect(unauthenticatedPage.isLoading()).toBe(false);
     expect(unauthenticatedPage.errorMessage()).toBe('Profil utilisateur introuvable.');
+  });
+
+  it('affiche un message traduit si la deconnexion echoue', async () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        {
+          provide: Auth,
+          useValue: {
+            waitForAuthState: () => Promise.resolve({ uid: 'user-1' }),
+            getCurrentProfile: () => Promise.resolve(null),
+            logout: () => Promise.reject(new Error('Network request failed')),
+          },
+        },
+      ],
+    });
+    const failedFixture = TestBed.createComponent(ProfilePage);
+    const failedPage = failedFixture.componentInstance;
+
+    await failedPage.logout();
+
+    expect(failedPage.errorMessage()).toBe('La déconnexion a échoué.');
+    expect(failedPage.isLoggingOut()).toBe(false);
   });
 });

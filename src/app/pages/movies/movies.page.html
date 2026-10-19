@@ -3,41 +3,45 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>Films MovieDB</ion-title>
+    <ion-title>{{ 'movies.title' | translate }}</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="toggleView()">{{ view() === 'grid' ? 'Liste' : 'Grille' }}</ion-button>
+      <ion-button (click)="toggleView()">
+        {{ (view() === 'grid' ? 'common.list' : 'common.grid') | translate }}
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
   <ion-searchbar
-    placeholder="Rechercher un film"
+    [placeholder]="'movies.searchPlaceholder' | translate"
     [value]="search()"
     (ionInput)="search.set($any($event).detail.value ?? '')"
     (keyup.enter)="searchMovies()">
   </ion-searchbar>
-  <ion-button expand="block" (click)="searchMovies()" [disabled]="isSearching()">Rechercher</ion-button>
+  <ion-button expand="block" (click)="searchMovies()" [disabled]="isSearching()">
+    {{ 'movies.search' | translate }}
+  </ion-button>
 
   <div class="filters">
     <ion-select
       interface="popover"
-      label="Trier"
+      [label]="'common.sort' | translate"
       [value]="sortBy()"
       (ionChange)="sortBy.set($any($event).detail.value)">
-      <ion-select-option value="popular">Popularité TMDB</ion-select-option>
-      <ion-select-option value="title">Titre (A-Z)</ion-select-option>
-      <ion-select-option value="date">Date (plus récent)</ion-select-option>
-      <ion-select-option value="rating">Note</ion-select-option>
+      <ion-select-option value="popular">{{ 'sort.popularityTmdb' | translate }}</ion-select-option>
+      <ion-select-option value="title">{{ 'sort.title' | translate }}</ion-select-option>
+      <ion-select-option value="date">{{ 'sort.date' | translate }}</ion-select-option>
+      <ion-select-option value="rating">{{ 'sort.rating' | translate }}</ion-select-option>
     </ion-select>
 
     @if (availableGenres().length > 0) {
       <ion-select
         interface="popover"
-        label="Genre"
+        [label]="'common.genre' | translate"
         [value]="selectedGenre()"
         (ionChange)="selectedGenre.set($any($event).detail.value)">
-        <ion-select-option value="">Tous les genres</ion-select-option>
+        <ion-select-option value="">{{ 'common.allGenres' | translate }}</ion-select-option>
         @for (genre of availableGenres(); track genre) {
           <ion-select-option [value]="genre">{{ genre }}</ion-select-option>
         }
@@ -47,7 +51,7 @@
     <ion-toggle
       [checked]="hideFavorited()"
       (ionChange)="hideFavorited.set($any($event).detail.checked)">
-      Masquer mes favoris
+      {{ 'movies.hideFavorites' | translate }}
     </ion-toggle>
   </div>
 
@@ -67,7 +71,7 @@
           favoriteAction="favorite"
           (actionToggled)="toggleFavorite($event)" />
       } @empty {
-        <ion-text><p>Aucun film ne correspond aux filtres.</p></ion-text>
+        <ion-text><p>{{ 'movies.empty' | translate }}</p></ion-text>
       }
     </div>
   }
@@ -78,7 +82,7 @@
       <ion-icon name="heart" aria-hidden="true"></ion-icon>
       <!-- ion-fab-button ecarte l'attribut aria-label de son hote : le nom
            accessible passe donc par un texte reserve aux lecteurs d'ecran. -->
-      <span class="visually-hidden">Voir ma playlist de favoris</span>
+      <span class="visually-hidden">{{ 'movies.fabLabel' | translate }}</span>
     </ion-fab-button>
   </ion-fab>
 </ion-content>

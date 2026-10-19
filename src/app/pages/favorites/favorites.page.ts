@@ -3,7 +3,9 @@ import { RouterLink } from '@angular/router';
 import { Favorite } from '../../services/favorite';
 import { Favorite as FavoriteModel } from '../../models/favorite.model';
 import { ViewMode, readViewMode, writeViewMode } from '../../services/view-preference';
-import { MovieCard } from '../../shared/movie-card/movie-card';
+import { MovieCardComponent } from '../../shared/movie-card/movie-card';
+import { TranslationService } from '../../i18n/translation.service';
+import { TranslatePipe } from '../../i18n/translate.pipe';
 import {
   IonBackButton, IonButtons, IonButton, IonContent, IonHeader,
   IonSearchbar, IonSelect, IonSelectOption, IonSpinner, IonText, IonTitle, IonToolbar,
@@ -18,11 +20,12 @@ type SortOption = 'popular' | 'title' | 'date' | 'rating';
   imports: [
     IonBackButton, IonButtons, IonButton, IonContent, IonHeader,
     IonSearchbar, IonSelect, IonSelectOption, IonSpinner, IonText, IonTitle, IonToolbar, RouterLink,
-    MovieCard,
+    MovieCardComponent, TranslatePipe,
   ],
 })
 export class FavoritesPage implements OnInit {
   private readonly favoriteService = inject(Favorite);
+  private readonly i18n = inject(TranslationService);
 
   favorites = signal<FavoriteModel[]>([]);
   isLoading = signal(true);
@@ -41,7 +44,8 @@ export class FavoritesPage implements OnInit {
         genres.add(genre);
       }
     }
-    return [...genres].sort((a, b) => a.localeCompare(b, 'fr'));
+    // La locale suit la langue de l'interface, pas une valeur figee.
+    return [...genres].sort((a, b) => a.localeCompare(b, this.i18n.language()));
   });
 
   readonly visibleFavorites = computed(() => {
@@ -63,9 +67,7 @@ export class FavoritesPage implements OnInit {
       this.favorites.set(result);
     } catch (error) {
       console.error('Erreur chargement favoris :', error);
-      this.errorMessage.set(
-        error instanceof Error ? error.message : 'Impossible de charger les favoris.'
-      );
+      this.errorMessage.set(this.i18n.t('errors.favoritesLoad'));
     } finally {
       this.isLoading.set(false);
     }
@@ -86,18 +88,16 @@ export class FavoritesPage implements OnInit {
       this.favorites.update((list) => list.filter((f) => f.id !== movieId));
     } catch (error) {
       console.error('Erreur suppression favori :', error);
-      this.errorMessage.set(
-        error instanceof Error ? error.message : 'Impossible de retirer ce film.'
-      );
+      this.errorMessage.set(this.i18n.t('errors.favoriteRemove'));
     }
   }
 
-  /** 'popular' conserve l'ordre de lecture, les autres critères réordonnent la copie. */
+  /** 'popular' conserve l'ordre de lecture, les autres criteres reordonnent la copie. */
   private sortFavorites(list: FavoriteModel[], sortBy: SortOption): FavoriteModel[] {
     const sorted = [...list];
     switch (sortBy) {
       case 'title':
-        return sorted.sort((a, b) => a.title.localeCompare(b.title, 'fr'));
+        return sorted.sort((a, b) => a.title.localeCompare(b.title, this.i18n.language()));
       case 'date':
         return sorted.sort((a, b) => (b.releaseDate ?? '').localeCompare(a.releaseDate ?? ''));
       case 'rating':

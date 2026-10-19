@@ -7,7 +7,9 @@ import { Movie as FirestoreMovie } from '../../services/movie';
 import { Movie as MovieModel } from '../../models/movie.model';
 import { TmdbService } from '../../services/tmdb.service';
 import { ViewMode, readViewMode, writeViewMode } from '../../services/view-preference';
-import { MovieCard } from '../../shared/movie-card/movie-card';
+import { MovieCardComponent } from '../../shared/movie-card/movie-card';
+import { TranslationService } from '../../i18n/translation.service';
+import { TranslatePipe } from '../../i18n/translate.pipe';
 import {
   IonBackButton, IonButtons, IonButton, IonContent, IonFab, IonFabButton, IonHeader, IonIcon,
   IonSearchbar, IonSelect, IonSelectOption, IonSpinner, IonText, IonTitle, IonToggle, IonToolbar,
@@ -27,13 +29,14 @@ addIcons({ heart });
   imports: [
     IonBackButton, IonButtons, IonButton, IonContent, IonFab, IonFabButton, IonHeader, IonIcon,
     IonSearchbar, IonSelect, IonSelectOption, IonSpinner, IonText, IonTitle, IonToggle, IonToolbar,
-    RouterLink, MovieCard,
+    RouterLink, MovieCardComponent, TranslatePipe,
   ],
 })
 export class MoviesPage implements OnInit {
-   readonly tmdb = inject(TmdbService);
+  readonly tmdb = inject(TmdbService);
   private readonly favorites = inject(Favorite);
-   private readonly firestoreMovies = inject(FirestoreMovie);
+  private readonly firestoreMovies = inject(FirestoreMovie);
+  private readonly i18n = inject(TranslationService);
 
   movies = signal<MovieModel[]>([]);
   favoriteIds = signal<Set<string>>(new Set());
@@ -57,7 +60,8 @@ export class MoviesPage implements OnInit {
         genres.add(genre);
       }
     }
-    return [...genres].sort((a, b) => a.localeCompare(b, 'fr'));
+    // La locale suit la langue de l'interface, pas une valeur figee.
+    return [...genres].sort((a, b) => a.localeCompare(b, this.i18n.language()));
   });
 
   readonly visibleMovies = computed(() => {
@@ -75,7 +79,7 @@ export class MoviesPage implements OnInit {
   });
 
   async ngOnInit(): Promise<void> {
-    // les films s'affichent même si les favoris échouent
+    // Les films s'affichent meme si les favoris echouent.
     try {
       const [tmdbMovies, storedMovies] = await Promise.all([
         this.tmdb.popular(),
@@ -84,7 +88,7 @@ export class MoviesPage implements OnInit {
       this.movies.set(this.mergeMovies(tmdbMovies, storedMovies));
     } catch (error) {
       console.error('Erreur TMDB :', error);
-      this.errorMessage.set(error instanceof Error ? error.message : 'Impossible de charger les films.');
+      this.errorMessage.set(this.i18n.t('errors.moviesLoad'));
     } finally {
       this.isLoading.set(false);
     }
@@ -92,7 +96,7 @@ export class MoviesPage implements OnInit {
     try {
       const favs = await this.favorites.list();
       this.favoriteIds.set(
-        new Set(favs.map((f) => f.id.replace(`${f.userId}_`, '')))
+        new Set(favs.map((f) => f.id.replace(`${f.userId}_`, ''))),
       );
     } catch (error) {
       console.error('Erreur favoris :', error);
@@ -114,7 +118,7 @@ export class MoviesPage implements OnInit {
       this.movies.set(this.mergeMovies(tmdbMovies, matchingStoredMovies));
     } catch (error) {
       console.error('Erreur recherche :', error);
-      this.errorMessage.set(error instanceof Error ? error.message : 'La recherche a échoué.');
+      this.errorMessage.set(this.i18n.t('errors.searchFailed'));
     } finally {
       this.isSearching.set(false);
     }
@@ -139,12 +143,12 @@ export class MoviesPage implements OnInit {
     return [...result.values()];
   }
 
-  /** 'popular' conserve l'ordre TMDB, les autres critères réordonnent la copie. */
+  /** 'popular' conserve l'ordre TMDB, les autres criteres reordonnent la copie. */
   private sortMovies(list: MovieModel[], sortBy: SortOption): MovieModel[] {
     const sorted = [...list];
     switch (sortBy) {
       case 'title':
-        return sorted.sort((a, b) => a.title.localeCompare(b.title, 'fr'));
+        return sorted.sort((a, b) => a.title.localeCompare(b.title, this.i18n.language()));
       case 'date':
         return sorted.sort((a, b) => (b.releaseDate ?? '').localeCompare(a.releaseDate ?? ''));
       case 'rating':
@@ -167,7 +171,7 @@ export class MoviesPage implements OnInit {
       }
     } catch (error) {
       console.error('Erreur favori :', error);
-      this.errorMessage.set(error instanceof Error ? error.message : 'Impossible de modifier les favoris.');
+      this.errorMessage.set(this.i18n.t('errors.favoriteToggle'));
     }
   }
 }

@@ -3,21 +3,21 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>Gestion des utilisateurs</ion-title>
+    <ion-title>{{ 'admin.usersTitle' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
   <ion-searchbar
-    placeholder="Rechercher (nom, email)"
+    [placeholder]="'admin.searchUsers' | translate"
     [value]="search()"
     (ionInput)="search.set($any($event).detail.value ?? '')">
   </ion-searchbar>
 
   <ion-segment [value]="statusFilter()" (ionChange)="statusFilter.set($any($event).detail.value)">
-    <ion-segment-button value="all"><ion-label>Tous</ion-label></ion-segment-button>
-    <ion-segment-button value="active"><ion-label>Actifs</ion-label></ion-segment-button>
-    <ion-segment-button value="inactive"><ion-label>Désactivés</ion-label></ion-segment-button>
+    <ion-segment-button value="all"><ion-label>{{ 'admin.filterAll' | translate }}</ion-label></ion-segment-button>
+    <ion-segment-button value="active"><ion-label>{{ 'admin.filterActive' | translate }}</ion-label></ion-segment-button>
+    <ion-segment-button value="inactive"><ion-label>{{ 'admin.filterInactive' | translate }}</ion-label></ion-segment-button>
   </ion-segment>
 
   @if (errorMessage()) {
@@ -32,10 +32,13 @@
         <ion-item>
           <ion-label>
             <h2>{{ user.firstName }} {{ user.lastName }}</h2>
-            <p>{{ user.email }} · {{ user.role }}</p>
+            <p>
+              {{ user.email }} ·
+              {{ (user.role === 'admin' ? 'common.roleAdmin' : 'common.roleUser') | translate }}
+            </p>
             <p>
               <ion-text [color]="user.active ? 'success' : 'danger'">
-                {{ user.active ? 'Actif' : 'Désactivé' }}
+                {{ (user.active ? 'common.active' : 'common.inactive') | translate }}
               </ion-text>
             </p>
           </ion-label>
@@ -47,12 +50,12 @@
               [color]="user.active ? 'danger' : 'success'"
               [disabled]="updatingUserId() === user.id"
               (click)="toggleActive(user)">
-              {{ user.active ? 'Désactiver' : 'Activer' }}
+              {{ (user.active ? 'admin.deactivate' : 'admin.activate') | translate }}
             </ion-button>
           }
         </ion-item>
       } @empty {
-        <ion-item><ion-label>Aucun utilisateur trouvé.</ion-label></ion-item>
+        <ion-item><ion-label>{{ 'admin.noUsers' | translate }}</ion-label></ion-item>
       }
     </ion-list>
   }

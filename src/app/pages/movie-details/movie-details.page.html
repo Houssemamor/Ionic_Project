@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/movies"></ion-back-button>
     </ion-buttons>
-    <ion-title>Détails du film</ion-title>
+    <ion-title>{{ 'details.title' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -12,7 +12,7 @@
     <div class="ion-text-center ion-padding"><ion-spinner></ion-spinner></div>
   } @else if (errorMessage() && !movie()) {
     <ion-text color="danger"><p>{{ errorMessage() }}</p></ion-text>
-    <ion-button (click)="goBackToMovies()">Retour aux films</ion-button>
+    <ion-button (click)="goBackToMovies()">{{ 'details.backToMovies' | translate }}</ion-button>
   } @else if (movie(); as m) {
     @if (errorMessage()) {
       <ion-text color="danger"><p>{{ errorMessage() }}</p></ion-text>
@@ -25,15 +25,20 @@
       <ion-card-content>
         <ion-card-title>{{ m.title }}</ion-card-title>
         <p>
-          @if (m.releaseDate) { Sortie : {{ m.releaseDate }} · }
-          Note : {{ m.voteAverage }}/10
+          @if (m.releaseDate) {
+            {{ 'details.release' | translate: { date: m.releaseDate } }}
+          }
+          @if (m.releaseDate && m.voteAverage) { · }
+          @if (m.voteAverage) {
+            {{ 'details.rating' | translate: { value: m.voteAverage } }}
+          }
         </p>
         <p>{{ m.overview }}</p>
 
         <ion-button [color]="isFavorite() ? 'danger' : 'medium'" (click)="toggleFavorite()">
-          {{ isFavorite() ? '♥ Retirer des favoris' : '♡ Ajouter aux favoris' }}
+          {{ (isFavorite() ? 'details.removeFavorite' : 'details.addFavorite') | translate }}
         </ion-button>
-        <ion-button fill="outline" (click)="goBackToMovies()">Retour</ion-button>
+        <ion-button fill="outline" (click)="goBackToMovies()">{{ 'common.back' | translate }}</ion-button>
       </ion-card-content>
     </ion-card>
   }

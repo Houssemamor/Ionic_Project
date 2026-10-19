@@ -1,35 +1,37 @@
-<!-- En-tête principal de la page d'administration. -->
+<!-- En-tete principal de la page d'administration. -->
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>Gestion des films</ion-title>
+    <ion-title>{{ 'admin.moviesTitle' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <!-- Contenu scrollable de la page de gestion des films. -->
 <ion-content [fullscreen]="true">
-  <!-- En-tête compact affiché pendant le défilement sur certains appareils. -->
+  <!-- En-tete compact affiche pendant le defilement sur certains appareils. -->
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Gestion des films</ion-title>
+      <ion-title size="large">{{ 'admin.moviesTitle' | translate }}</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <!-- Champs du formulaire utilisés pour créer un film. -->
-  <ion-item><ion-label position="stacked">Titre</ion-label><ion-input [(ngModel)]="title"></ion-input></ion-item>
-  <ion-item><ion-label position="stacked">Synopsis</ion-label><ion-input [(ngModel)]="overview"></ion-input></ion-item>
-  <ion-item><ion-label position="stacked">Date de sortie</ion-label><ion-input type="date" [(ngModel)]="releaseDate"></ion-input></ion-item>
-  <ion-item><ion-label position="stacked">URL de l'affiche</ion-label><ion-input [(ngModel)]="posterPath"></ion-input></ion-item>
-  <ion-item><ion-label position="stacked">Genres séparés par des virgules</ion-label><ion-input [(ngModel)]="genresText"></ion-input></ion-item>
+  <!-- Champs du formulaire utilises pour creer un film. -->
+  <ion-item><ion-label position="stacked">{{ 'admin.movieTitle' | translate }}</ion-label><ion-input [(ngModel)]="title"></ion-input></ion-item>
+  <ion-item><ion-label position="stacked">{{ 'admin.overview' | translate }}</ion-label><ion-input [(ngModel)]="overview"></ion-input></ion-item>
+  <ion-item><ion-label position="stacked">{{ 'admin.releaseDate' | translate }}</ion-label><ion-input type="date" [(ngModel)]="releaseDate"></ion-input></ion-item>
+  <ion-item><ion-label position="stacked">{{ 'admin.posterUrl' | translate }}</ion-label><ion-input [(ngModel)]="posterPath"></ion-input></ion-item>
+  <ion-item><ion-label position="stacked">{{ 'admin.genresComma' | translate }}</ion-label><ion-input [(ngModel)]="genresText"></ion-input></ion-item>
 
-  <!-- Lance l'ajout et reste désactivé pendant l'enregistrement. -->
-  <ion-button expand="block" [disabled]="isSaving" (click)="addMovie()">Ajouter le film</ion-button>
+  <!-- Lance l'ajout et reste desactive pendant l'enregistrement. -->
+  <ion-button expand="block" [disabled]="isSaving" (click)="addMovie()">
+    {{ 'admin.addMovie' | translate }}
+  </ion-button>
 
-  <!-- Messages d'état de l'ajout ou du chargement. -->
+  <!-- Messages d'etat de l'ajout ou du chargement. -->
   @if (isSaving) {
-    <ion-text><p>Enregistrement du film en cours...</p></ion-text>
+    <ion-text><p>{{ 'admin.savingMovie' | translate }}</p></ion-text>
   }
   @if (successMessage) {
     <ion-text color="success"><p>{{ successMessage }}</p></ion-text>
@@ -37,23 +39,23 @@
   @if (errorMessage) {
     <ion-text color="danger"><p>{{ errorMessage }}</p></ion-text>
   }
-  <ion-text><h2>Films ajoutés par l'administrateur</h2></ion-text>
+  <ion-text><h2>{{ 'admin.adminMovies' | translate }}</h2></ion-text>
   @if (isLoading) {
-    <ion-text><p>Chargement des films...</p></ion-text>
+    <ion-text><p>{{ 'admin.loadingMovies' | translate }}</p></ion-text>
   }
   @if (!isLoading && errorMessage) {
-    <ion-button fill="outline" (click)="loadMovies()">Réessayer le chargement</ion-button>
+    <ion-button fill="outline" (click)="loadMovies()">{{ 'common.retry' | translate }}</ion-button>
   }
   @if (!isLoading && movies.length === 0) {
-    <ion-text color="medium"><p>Aucun film ajouté pour le moment.</p></ion-text>
+    <ion-text color="medium"><p>{{ 'admin.noMovies' | translate }}</p></ion-text>
   }
 
-  <!-- Sélection explicite d'un film à supprimer. -->
+  <!-- Selection explicite d'un film a supprimer. -->
   <ion-item>
-    <ion-label>Supprimer un film</ion-label>
+    <ion-label>{{ 'admin.deleteMovieLabel' | translate }}</ion-label>
     <ion-select
       [(ngModel)]="selectedMovieId"
-      placeholder="Choisir un film"
+      [placeholder]="'admin.chooseMovie' | translate"
       [disabled]="isLoading || movies.length === 0 || isDeletingMovieId !== null">
       @for (movie of movies; track movie.id) {
         <ion-select-option [value]="movie.id">{{ movie.title }}</ion-select-option>
@@ -61,26 +63,30 @@
     </ion-select>
   </ion-item>
 
-  <!-- Supprime le film choisi après confirmation. -->
+  <!-- Supprime le film choisi apres confirmation. -->
   <ion-button
     expand="block"
     color="danger"
     [disabled]="!selectedMovieId || isDeletingMovieId !== null"
     (click)="deleteSelectedMovie()">
-    Supprimer le film sélectionné
+    {{ 'admin.deleteSelected' | translate }}
   </ion-button>
 
-  <!-- Affiche chaque film et fournit également une suppression directe par ligne. -->
-  <ion-list *ngIf="!isLoading">
-    <ion-item *ngFor="let movie of movies">
-      <ion-label><h2>{{ movie.title }}</h2><p>{{ movie.overview }}</p></ion-label>
-      <ion-button
-        slot="end"
-        color="danger"
-        [disabled]="isDeletingMovieId !== null"
-        (click)="deleteMovie(movie)">
-        {{ isDeletingMovieId === movie.id ? 'Suppression...' : 'Supprimer' }}
-      </ion-button>
-    </ion-item>
-  </ion-list>
+  <!-- Affiche chaque film et fournit egalement une suppression directe par ligne. -->
+  @if (!isLoading) {
+    <ion-list>
+      @for (movie of movies; track movie.id) {
+        <ion-item>
+          <ion-label><h2>{{ movie.title }}</h2><p>{{ movie.overview }}</p></ion-label>
+          <ion-button
+            slot="end"
+            color="danger"
+            [disabled]="isDeletingMovieId !== null"
+            (click)="deleteMovie(movie)">
+            {{ (isDeletingMovieId === movie.id ? 'common.deleting' : 'common.delete') | translate }}
+          </ion-button>
+        </ion-item>
+      }
+    </ion-list>
+  }
 </ion-content>

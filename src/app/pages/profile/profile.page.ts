@@ -1,5 +1,5 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import {
   IonBackButton,
   IonButton,
@@ -19,9 +19,9 @@ import {
 } from '@ionic/angular';
 import { Auth } from '../../services/auth';
 import { UserProfile } from '../../models/user.model';
-import {
-  MovieLanguage, readMovieLanguage, writeMovieLanguage,
-} from '../../services/language-preference';
+import { TranslationService } from '../../i18n/translation.service';
+import { TranslatePipe } from '../../i18n/translate.pipe';
+import { AppLanguage } from '../../services/language-preference';
 
 const PROFILE_LOAD_TIMEOUT_MS = 12000;
 
@@ -31,70 +31,81 @@ const PROFILE_LOAD_TIMEOUT_MS = 12000;
   styleUrls: ['./profile.page.scss'],
   imports: [
     IonBackButton, IonButton, IonButtons, IonCard, IonCardContent, IonContent, IonHeader,
-    IonItem, IonLabel, IonSelect, IonSelectOption, IonSpinner, IonText, IonTitle, IonToolbar,
-    RouterLink,
+    IonItem, IonSelect, IonSelectOption, IonSpinner, IonText, IonTitle, IonToolbar,
+    TranslatePipe,
   ],
 })
 export class ProfilePage implements OnInit {
+  private readonly auth = inject(Auth);
+  private readonly router = inject(Router);
+  readonly i18n = inject(TranslationService);
+
   profile = signal<UserProfile | null>(null);
   isLoading = signal(true);
   isLoggingOut = signal(false);
   errorMessage = signal('');
-  // Preference locale, independante du profil Firestore : elle reste sur
-  // l'appareil comme le mode d'affichage grille/liste.
-  language = signal<MovieLanguage>(readMovieLanguage());
 
-  constructor(
-    private readonly auth: Auth,
-    private readonly router: Router,
-  ) {}
+  /** Initiales affichees quand le profil n'a pas de photo. */
+  readonly initials = computed(() => {
+    const user = this.profile();
+    if (!user) {
+      return '';
+    }
+    return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
+  });
 
   async ngOnInit(): Promise<void> {
     let timeoutId: number | undefined;
     try {
       const timeout = new Promise<never>((_, reject) => {
         timeoutId = window.setTimeout(() => {
-          reject(new Error('Le chargement du profil a dépassé le délai. Vérifiez votre connexion et réessayez.'));
+          reject(new Error(this.i18n.t('errors.profileTimeout')));
         }, PROFILE_LOAD_TIMEOUT_MS);
       });
 
       const result = await Promise.race([this.loadProfile(), timeout]);
       this.profile.set(result);
       if (!result) {
-        this.errorMessage.set('Profil utilisateur introuvable.');
+        this.errorMessage.set(this.i18n.t('errors.profileNotFound'));
       }
     } catch (error) {
-      console.error('Erreur profil :', error);   // utile pour voir la vraie cause
-      this.errorMessage.set(
-        error instanceof Error ? error.message : 'Impossible de charger le profil.'
-      );
+      console.error('Erreur profil :', error);
+      // Le detail technique reste en console : l'interface n'affiche que la
+      // langue choisie, jamais un message brut de Firebase.
+      this.errorMessage.set(this.i18n.t('errors.profileLoad'));
     } finally {
-      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+      if (timeoutId !== undefined) {
+        window.clearTimeout(timeoutId);
+      }
       this.isLoading.set(false);
     }
   }
 
   private async loadProfile(): Promise<UserProfile | null> {
     const user = await this.auth.waitForAuthState();
-    if (!user) return null;
+    if (!user) {
+      return null;
+    }
     return this.auth.getCurrentProfile(user);
   }
 
-  /** Enregistre la langue des metadonnees TMDB choisie dans le profil. */
+  /**
+   * La langue choisie est globale : interface, messages et metadonnees TMDB.
+   * Le service la conserve sur l'appareil et met a jour le signal partage.
+   */
   changeLanguage(value: string | undefined): void {
-    const language: MovieLanguage = value === 'en' ? 'en' : 'fr';
-    writeMovieLanguage(language);
-    this.language.set(language);
+    const language: AppLanguage = value === 'en' ? 'en' : 'fr';
+    this.i18n.setLanguage(language);
   }
 
-  async logout(): Promise<void> {    this.isLoggingOut.set(true);
+  async logout(): Promise<void> {
+    this.isLoggingOut.set(true);
     try {
       await this.auth.logout();
       await this.router.navigateByUrl('/login', { replaceUrl: true });
     } catch (error) {
-      this.errorMessage.set(
-        error instanceof Error ? error.message : 'La déconnexion a échoué.'
-      );
+      console.error('Erreur deconnexion :', error);
+      this.errorMessage.set(this.i18n.t('errors.logout'));
       this.isLoggingOut.set(false);
     }
   }

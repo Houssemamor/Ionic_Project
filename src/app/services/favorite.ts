@@ -6,11 +6,13 @@ import { FirebaseService } from './firebase.service';
 import { Auth } from './auth';
 import { Favorite as FavoriteModel } from '../models/favorite.model';
 import { Movie } from '../models/movie.model';
+import { TranslationService } from '../i18n/translation.service';
 
 @Injectable({ providedIn: 'root' })
 export class Favorite {
   private readonly firebase = inject(FirebaseService);
   private readonly auth = inject(Auth);
+  private readonly i18n = inject(TranslationService);
 
 async list(): Promise<FavoriteModel[]> {
   console.log('SERVICE: avant requireUserId');
@@ -59,7 +61,7 @@ async list(): Promise<FavoriteModel[]> {
   private async requireUserId(): Promise<string> {
     const user = await this.auth.waitForAuthState();
     if (!user) {
-      throw new Error('Vous devez être connecté pour gérer vos favoris.');
+      throw new Error(this.i18n.t('errors.notLoggedInFavorites'));
     }
     return user.uid;
   }

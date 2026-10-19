@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Auth } from './auth';
 import { Favorite } from './favorite';
 import { UserProfile } from '../models/user.model';
+import { TranslationService } from '../i18n/translation.service';
 
 export interface MatchResult {
   user: UserProfile;
@@ -20,11 +21,12 @@ export interface MatchingOutcome {
 export class Matching {
   private readonly auth = inject(Auth);
   private readonly favorites = inject(Favorite);
+  private readonly i18n = inject(TranslationService);
 
   async findMatches(threshold = 75): Promise<MatchingOutcome> {
     const me = await this.auth.waitForAuthState();
     if (!me) {
-      throw new Error('Vous devez être connecté.');
+      throw new Error(this.i18n.t('errors.notLoggedIn'));
     }
 
     const [users, allFavorites] = await Promise.all([

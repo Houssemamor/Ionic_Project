@@ -1,55 +1,97 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <!-- Bouton retour natif Ionic : suit l'historique de navigation et
-           retombe sur /home quand la page est ouverte directement. -->
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>Mon profil</ion-title>
+    <ion-title>{{ 'profile.title' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
   @if (isLoading()) {
-    <div class="ion-text-center">
+    <div class="loading">
       <ion-spinner></ion-spinner>
+      <p>{{ 'common.loading' | translate }}</p>
     </div>
   } @else if (errorMessage()) {
     <ion-text color="danger"><p>{{ errorMessage() }}</p></ion-text>
-    <ion-button routerLink="/home">Retour</ion-button>
-  } @else if (profile(); as p) {
-    @if (p.photoUrl) {
-      <img class="profile-photo" [src]="p.photoUrl" alt="Photo de profil" />
-    }
+  } @else if (profile(); as user) {
+    <section class="identity">
+      @if (user.photoUrl) {
+        <img class="avatar" [src]="user.photoUrl" alt="" />
+      } @else {
+        <span class="avatar avatar-initials" aria-hidden="true">{{ initials() }}</span>
+      }
+      <div class="identity-text">
+        <h1>{{ user.firstName }} {{ user.lastName }}</h1>
+        <p class="email">{{ user.email }}</p>
+        <div class="chips">
+          <span class="chip">
+            {{ (user.role === 'admin' ? 'common.roleAdmin' : 'common.roleUser') | translate }}
+          </span>
+          <span class="chip" [class.chip-inactive]="!user.active">
+            {{ (user.active ? 'common.active' : 'common.inactive') | translate }}
+          </span>
+        </div>
+      </div>
+    </section>
+
     <ion-card>
       <ion-card-content>
-        <ion-item><ion-label>Prénom : {{ p.firstName }}</ion-label></ion-item>
-        <ion-item><ion-label>Nom : {{ p.lastName }}</ion-label></ion-item>
-        <ion-item><ion-label>Email : {{ p.email }}</ion-label></ion-item>
-        <ion-item><ion-label>Âge : {{ p.age }}</ion-label></ion-item>
-        <ion-item><ion-label>Rôle : {{ p.role }}</ion-label></ion-item>
-        <ion-item><ion-label>Statut : {{ p.active ? 'Actif' : 'Désactivé' }}</ion-label></ion-item>
+        <h2>{{ 'profile.personalInfo' | translate }}</h2>
+        <div class="info-row">
+          <span class="info-label">{{ 'common.firstName' | translate }}</span>
+          <span class="info-value">{{ user.firstName }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">{{ 'common.lastName' | translate }}</span>
+          <span class="info-value">{{ user.lastName }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">{{ 'common.email' | translate }}</span>
+          <span class="info-value">{{ user.email }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">{{ 'common.age' | translate }}</span>
+          <span class="info-value">{{ user.age }}</span>
+        </div>
       </ion-card-content>
     </ion-card>
 
-    <!-- Preference d'affichage : s'applique aux titres, synopsis et genres
-         demandes a TMDB, sans toucher aux libelles de l'interface. -->
     <ion-card>
       <ion-card-content>
-        <ion-item lines="none">
+        <h2>{{ 'profile.preferences' | translate }}</h2>
+        <ion-item lines="none" class="preference-item">
           <ion-select
-            label="Langue des films"
-            [value]="language()"
-            (ionChange)="changeLanguage($event.detail.value)">
+            label="{{ 'profile.language' | translate }}"
+            interface="popover"
+            [value]="i18n.language()"
+            (ionChange)="changeLanguage($any($event).detail.value)">
             <ion-select-option value="fr">Français</ion-select-option>
             <ion-select-option value="en">English</ion-select-option>
           </ion-select>
         </ion-item>
+        <p class="hint">{{ 'profile.languageHint' | translate }}</p>
       </ion-card-content>
     </ion-card>
 
-    <ion-button expand="block" color="danger" (click)="logout()" [disabled]="isLoggingOut()">
-      Se déconnecter
-    </ion-button>
+    <ion-card>
+      <ion-card-content>
+        <h2>{{ 'profile.account' | translate }}</h2>
+        <ion-button
+          expand="block"
+          color="danger"
+          fill="outline"
+          [disabled]="isLoggingOut()"
+          (click)="logout()">
+          @if (isLoggingOut()) {
+            <ion-spinner name="crescent"></ion-spinner>
+            <span class="logout-label">{{ 'profile.loggingOut' | translate }}</span>
+          } @else {
+            {{ 'profile.logout' | translate }}
+          }
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
   }
 </ion-content>

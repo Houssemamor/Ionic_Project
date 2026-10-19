@@ -6,6 +6,8 @@ import {
 } from '@ionic/angular';
 import { Auth } from '../../../services/auth';
 import { UserProfile } from '../../../models/user.model';
+import { TranslationService } from '../../../i18n/translation.service';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 
 type StatusFilter = 'all' | 'active' | 'inactive';
 
@@ -16,11 +18,12 @@ type StatusFilter = 'all' | 'active' | 'inactive';
   imports: [
     IonBackButton, IonButtons, IonButton, IonContent, IonHeader, IonItem, IonLabel, IonList,
     IonSearchbar, IonSegment, IonSegmentButton, IonSpinner, IonText,
-    IonTitle, IonToolbar,
+    IonTitle, IonToolbar, TranslatePipe,
   ],
 })
 export class UsersPage implements OnInit {
   private readonly auth = inject(Auth);
+  private readonly i18n = inject(TranslationService);
 
   users = signal<UserProfile[]>([]);
   search = signal('');
@@ -47,9 +50,7 @@ export class UsersPage implements OnInit {
       this.users.set(await this.auth.listUsers());
     } catch (error) {
       console.error('Erreur listUsers :', error);
-      this.errorMessage.set(
-        error instanceof Error ? error.message : 'Impossible de charger les utilisateurs.'
-      );
+      this.errorMessage.set(this.i18n.t('errors.usersLoad'));
     } finally {
       this.isLoading.set(false);
     }
@@ -61,15 +62,13 @@ export class UsersPage implements OnInit {
     try {
       const newValue = !user.active;
       await this.auth.setUserActive(user.id, newValue);
-      // on remplace l'objet pour que le signal détecte le changement
+      // On remplace l'objet pour que le signal detecte le changement.
       this.users.update((list) =>
-        list.map((u) => (u.id === user.id ? { ...u, active: newValue } : u))
+        list.map((u) => (u.id === user.id ? { ...u, active: newValue } : u)),
       );
     } catch (error) {
       console.error('Erreur setUserActive :', error);
-      this.errorMessage.set(
-        error instanceof Error ? error.message : 'Impossible de modifier le statut.'
-      );
+      this.errorMessage.set(this.i18n.t('errors.statusUpdate'));
     } finally {
       this.updatingUserId.set('');
     }

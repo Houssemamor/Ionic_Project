@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Accueil</ion-title>
+    <ion-title>{{ 'home.title' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -8,62 +8,107 @@
   @if (isLoading()) {
     <div class="loading">
       <ion-spinner></ion-spinner>
-      <p>Chargement de votre espace...</p>
+      <p>{{ 'common.loading' | translate }}</p>
     </div>
   } @else if (errorMessage()) {
     <ion-text color="danger"><p>{{ errorMessage() }}</p></ion-text>
   } @else if (profile(); as user) {
-    <section class="welcome">
+    <!-- Identite cliquable : le bloc entier mene au profil. -->
+    <a class="identity" routerLink="/profile">
       @if (user.photoUrl) {
-        <img class="profile-photo" [src]="user.photoUrl" [alt]="user.firstName" />
+        <img class="avatar" [src]="user.photoUrl" alt="" />
+      } @else {
+        <span class="avatar avatar-initials" aria-hidden="true">{{ initials() }}</span>
       }
-      <h1>Bonjour {{ user.firstName }} !</h1>
-      <p>
-        {{ user.role === 'admin' ? 'Espace d’administration' : 'Bienvenue dans votre espace films' }}
-      </p>
-    </section>
+      <span class="identity-text">
+        <span class="greeting">{{ 'home.greeting' | translate: { name: user.firstName } }}</span>
+        <span class="identity-subtitle">
+          {{ (user.role === 'admin' ? 'home.adminSpace' : 'home.userSpace') | translate }}
+        </span>
+        <span class="chip">{{ (user.role === 'admin' ? 'common.roleAdmin' : 'common.roleUser') | translate }}</span>
+      </span>
+      <ion-icon name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+      <span class="visually-hidden">{{ 'home.profileLink' | translate }}</span>
+    </a>
 
-    @if (user.role === 'admin') {
-      <ion-card class="navigation-card">
-        <ion-card-content>
-          <h2>Administration</h2>
-          <ion-list lines="none">
-            <ion-item class="navigation-item" button routerLink="/admin/dashboard">
-              <ion-label><h3>Tableau de bord</h3><p>Voir le résumé de l’application</p></ion-label>
-            </ion-item>
-            <ion-item class="navigation-item" button routerLink="/admin/movies">
-              <ion-label><h3>Gérer les films</h3><p>Ajouter ou supprimer des films</p></ion-label>
-            </ion-item>
-            <ion-item class="navigation-item" button routerLink="/admin/users">
-              <ion-label><h3>Gérer les utilisateurs</h3><p>Activer ou désactiver un compte</p></ion-label>
-            </ion-item>
-          </ion-list>
-        </ion-card-content>
-      </ion-card>
-    } @else {
-      <ion-card class="navigation-card">
-        <ion-card-content>
-          <h2>Mon espace films</h2>
-          <ion-list lines="none">
-            <ion-item class="navigation-item" button routerLink="/movies">
-              <ion-label><h3>Découvrir les films</h3><p>Rechercher des films et voir les détails</p></ion-label>
-            </ion-item>
-            <ion-item class="navigation-item" button routerLink="/favorites">
-              <ion-label><h3>Ma playlist</h3><p>Retrouver mes films favoris</p></ion-label>
-            </ion-item>
-            <ion-item class="navigation-item" button routerLink="/matching">
-              <ion-label><h3>Mes correspondances</h3><p>Trouver des utilisateurs aux goûts similaires</p></ion-label>
-            </ion-item>
-          </ion-list>
-        </ion-card-content>
-      </ion-card>
+    @if (recommendations().length > 0) {
+      <section class="recommendations">
+        <h2>{{ 'home.recommendationsTitle' | translate }}</h2>
+        <p class="reason">
+          {{ 'home.recommendationsReason' | translate: { genre: recommendationGenre() } }}
+        </p>
+        <div class="recommendation-row">
+          @for (movie of recommendations(); track movie.id) {
+            <a class="recommendation" [routerLink]="['/movie-details', movie.id]">
+              @if (movie.posterPath) {
+                <img class="recommendation-poster" [src]="movie.posterPath" [alt]="movie.title" />
+              } @else {
+                <span class="recommendation-poster placeholder" aria-hidden="true"></span>
+              }
+              <span class="recommendation-title">{{ movie.title }}</span>
+              @if (movie.voteAverage) {
+                <span
+                  class="recommendation-rating"
+                  role="img"
+                  [attr.aria-label]="'card.ratingLabel' | translate: { value: movie.voteAverage.toFixed(1) }">
+                  <ion-icon name="star" aria-hidden="true"></ion-icon>
+                  {{ movie.voteAverage.toFixed(1) }}
+                </span>
+              }
+            </a>
+          }
+        </div>
+      </section>
     }
 
-    <div class="actions">
-      <ion-button routerLink="/profile" fill="outline">Mon profil</ion-button>
-      <ion-button color="danger" (click)="logout()" [disabled]="isLoggingOut">
-        {{ isLoggingOut ? 'Déconnexion...' : 'Se déconnecter' }}
-      </ion-button>
-    </div>
+    <nav class="actions">
+      @if (user.role === 'admin') {
+        <a class="tile tile-wide" routerLink="/admin/dashboard">
+          <ion-icon name="speedometer-outline" aria-hidden="true"></ion-icon>
+          <span class="tile-text">
+            <span class="tile-title">{{ 'home.dashboardTitle' | translate }}</span>
+            <span class="tile-subtitle">{{ 'home.dashboardSubtitle' | translate }}</span>
+          </span>
+          <ion-icon name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+        </a>
+        <a class="tile" routerLink="/admin/movies">
+          <ion-icon name="film-outline" aria-hidden="true"></ion-icon>
+          <span class="tile-text">
+            <span class="tile-title">{{ 'home.manageMoviesTitle' | translate }}</span>
+            <span class="tile-subtitle">{{ 'home.manageMoviesSubtitle' | translate }}</span>
+          </span>
+        </a>
+        <a class="tile" routerLink="/admin/users">
+          <ion-icon name="people-outline" aria-hidden="true"></ion-icon>
+          <span class="tile-text">
+            <span class="tile-title">{{ 'home.manageUsersTitle' | translate }}</span>
+            <span class="tile-subtitle">{{ 'home.manageUsersSubtitle' | translate }}</span>
+          </span>
+        </a>
+      } @else {
+        <a class="tile tile-wide" routerLink="/movies">
+          <ion-icon name="film-outline" aria-hidden="true"></ion-icon>
+          <span class="tile-text">
+            <span class="tile-title">{{ 'home.discoverTitle' | translate }}</span>
+            <span class="tile-subtitle">{{ 'home.discoverSubtitle' | translate }}</span>
+          </span>
+          <ion-icon name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+        </a>
+        <a class="tile" routerLink="/favorites">
+          <ion-icon name="heart-outline" aria-hidden="true"></ion-icon>
+          <span class="tile-text">
+            <span class="tile-title">{{ 'home.favoritesTitle' | translate }}</span>
+            <span class="tile-subtitle">{{ 'home.favoritesSubtitle' | translate }}</span>
+          </span>
+        </a>
+        <a class="tile" routerLink="/matching">
+          <ion-icon name="people-outline" aria-hidden="true"></ion-icon>
+          <span class="tile-text">
+            <span class="tile-title">{{ 'home.matchingTitle' | translate }}</span>
+            <span class="tile-subtitle">{{ 'home.matchingSubtitle' | translate }}</span>
+          </span>
+        </a>
+      }
+    </nav>
   }
 </ion-content>

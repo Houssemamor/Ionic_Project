@@ -3,20 +3,20 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>Mes correspondances</ion-title>
+    <ion-title>{{ 'matching.title' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <p>Utilisateurs ayant plus de 75 % de films favoris en commun.</p>
+  <p>{{ 'matching.intro' | translate }}</p>
 
   @if (isLoading()) {
     <div class="ion-text-center ion-padding"><ion-spinner></ion-spinner></div>
   } @else if (errorMessage()) {
     <ion-text color="danger"><p>{{ errorMessage() }}</p></ion-text>
   } @else if (myFavoritesCount() === 0) {
-    <ion-text><p>Ajoutez d'abord des films à vos favoris pour trouver des correspondances.</p></ion-text>
-    <ion-button routerLink="/movies">Découvrir des films</ion-button>
+    <ion-text><p>{{ 'matching.emptyFavorites' | translate }}</p></ion-text>
+    <ion-button routerLink="/movies">{{ 'matching.discover' | translate }}</ion-button>
   } @else {
     @for (match of matches(); track match.user.id) {
       <ion-card>
@@ -27,19 +27,21 @@
             }
             <ion-label>
               <h2>{{ match.user.firstName }} {{ match.user.lastName }}</h2>
-              <p><strong>{{ match.rate }} %</strong> de correspondance</p>
+              <p>{{ 'matching.rate' | translate: { rate: match.rate } }}</p>
             </ion-label>
           </ion-item>
-          <p>Films en commun : {{ match.commonTitles.join(', ') }}</p>
+          <p>{{ 'matching.commonTitles' | translate: { titles: match.commonTitles.join(', ') } }}</p>
         </ion-card-content>
       </ion-card>
     } @empty {
       <ion-text>
-        <p>Aucun utilisateur ne dépasse 75 % de correspondance pour le moment.</p>
+        <p>{{ 'matching.noMatches' | translate }}</p>
         <p>
-          Vos favoris : {{ myFavoritesCount() }} ·
-          Utilisateurs comparés : {{ checkedUsersCount() }} ·
-          Meilleur taux : {{ bestRate() }} %
+          {{ 'matching.stats' | translate: {
+            favorites: myFavoritesCount(),
+            checked: checkedUsersCount(),
+            best: bestRate()
+          } }}
         </p>
       </ion-text>
     }

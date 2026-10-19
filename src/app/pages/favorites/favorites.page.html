@@ -3,9 +3,11 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>Ma playlist de favoris</ion-title>
+    <ion-title>{{ 'favorites.title' | translate }}</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="toggleView()">{{ view() === 'grid' ? 'Liste' : 'Grille' }}</ion-button>
+      <ion-button (click)="toggleView()">
+        {{ (view() === 'grid' ? 'common.list' : 'common.grid') | translate }}
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
@@ -21,7 +23,7 @@
     }
 
     <ion-searchbar
-      placeholder="Rechercher dans ma playlist"
+      [placeholder]="'favorites.searchPlaceholder' | translate"
       [value]="search()"
       (ionInput)="search.set($any($event).detail.value ?? '')">
     </ion-searchbar>
@@ -29,22 +31,22 @@
     <div class="filters">
       <ion-select
         interface="popover"
-        label="Trier"
+        [label]="'common.sort' | translate"
         [value]="sortBy()"
         (ionChange)="sortBy.set($any($event).detail.value)">
-        <ion-select-option value="popular">Ordre d'ajout</ion-select-option>
-        <ion-select-option value="title">Titre (A-Z)</ion-select-option>
-        <ion-select-option value="date">Date (plus récent)</ion-select-option>
-        <ion-select-option value="rating">Note</ion-select-option>
+        <ion-select-option value="popular">{{ 'sort.addedOrder' | translate }}</ion-select-option>
+        <ion-select-option value="title">{{ 'sort.title' | translate }}</ion-select-option>
+        <ion-select-option value="date">{{ 'sort.date' | translate }}</ion-select-option>
+        <ion-select-option value="rating">{{ 'sort.rating' | translate }}</ion-select-option>
       </ion-select>
 
       @if (availableGenres().length > 0) {
         <ion-select
           interface="popover"
-          label="Genre"
+          [label]="'common.genre' | translate"
           [value]="selectedGenre()"
           (ionChange)="selectedGenre.set($any($event).detail.value)">
-          <ion-select-option value="">Tous les genres</ion-select-option>
+          <ion-select-option value="">{{ 'common.allGenres' | translate }}</ion-select-option>
           @for (genre of availableGenres(); track genre) {
             <ion-select-option [value]="genre">{{ genre }}</ion-select-option>
           }
@@ -61,8 +63,8 @@
           (actionToggled)="remove(favorite.id)" />
       } @empty {
         @if (!errorMessage()) {
-          <ion-text><p>Aucun film ne correspond aux filtres.</p></ion-text>
-          <ion-button routerLink="/movies">Découvrir des films</ion-button>
+          <ion-text><p>{{ 'favorites.empty' | translate }}</p></ion-text>
+          <ion-button routerLink="/movies">{{ 'favorites.discover' | translate }}</ion-button>
         }
       }
     </div>

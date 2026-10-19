@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { MovieCard } from './movie-card';
+import { MovieCardComponent } from './movie-card';
 import { Movie } from '../../models/movie.model';
 
 describe('MovieCard', () => {
-  let fixture: ComponentFixture<MovieCard>;
-  let component: MovieCard;
+  let fixture: ComponentFixture<MovieCardComponent>;
+  let component: MovieCardComponent;
   let router: Router;
 
   const movie: Movie = {
@@ -19,7 +19,7 @@ describe('MovieCard', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideRouter([])] });
     router = TestBed.inject(Router);
-    fixture = TestBed.createComponent(MovieCard);
+    fixture = TestBed.createComponent(MovieCardComponent);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('movie', movie);
     fixture.componentRef.setInput('view', 'grid');

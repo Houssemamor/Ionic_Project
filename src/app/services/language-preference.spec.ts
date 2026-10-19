@@ -1,4 +1,4 @@
-import { readMovieLanguage, writeMovieLanguage } from './language-preference';
+import { readAppLanguage, writeAppLanguage } from './language-preference';
 
 describe('language preference', () => {
   beforeEach(() => {
@@ -10,20 +10,20 @@ describe('language preference', () => {
   });
 
   it('utilise le francais par defaut', () => {
-    expect(readMovieLanguage()).toBe('fr');
+    expect(readAppLanguage()).toBe('fr');
   });
 
   it('relit la langue memorisee', () => {
-    writeMovieLanguage('en');
-    expect(readMovieLanguage()).toBe('en');
+    writeAppLanguage('en');
+    expect(readAppLanguage()).toBe('en');
 
-    writeMovieLanguage('fr');
-    expect(readMovieLanguage()).toBe('fr');
+    writeAppLanguage('fr');
+    expect(readAppLanguage()).toBe('fr');
   });
 
   it('retombe sur le francais si la valeur stockee est inconnue', () => {
-    // Protect against a corrupted or manually edited localStorage entry.
+    // Protege contre une entree localStorage corrompue ou modifiee a la main.
     localStorage.setItem('movieDataLanguage', 'de');
-    expect(readMovieLanguage()).toBe('fr');
+    expect(readAppLanguage()).toBe('fr');
   });
 });

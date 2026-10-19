@@ -1,5 +1,4 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import {
@@ -16,6 +15,8 @@ import {
 } from '@ionic/angular';
 import { Auth } from '../../services/auth';
 import { Camera, CameraResultType } from '@capacitor/camera';
+import { TranslationService } from '../../i18n/translation.service';
+import { TranslatePipe } from '../../i18n/translate.pipe';
 
 @Component({
   selector: 'app-register',
@@ -32,12 +33,16 @@ import { Camera, CameraResultType } from '@capacitor/camera';
     IonText,
     IonTitle,
     IonToolbar,
-    CommonModule,
     FormsModule,
     RouterLink,
+    TranslatePipe,
   ],
 })
 export class RegisterPage {
+  private readonly auth = inject(Auth);
+  private readonly router = inject(Router);
+  private readonly i18n = inject(TranslationService);
+
   firstName = '';
   lastName = '';
   age: number | null = null;
@@ -57,11 +62,13 @@ export class RegisterPage {
         resultType: CameraResultType.DataUrl,
       });
       if (!photo.dataUrl) {
-        throw new Error('La photo n’a pas pu être récupérée.');
+        throw new Error(this.i18n.t('errors.photoNotRetrieved'));
       }
       this.photoDataUrl = await this.optimizePhoto(photo.dataUrl);
     } catch (error) {
-      this.errorMessage = error instanceof Error ? error.message : 'Impossible de prendre la photo.';
+      this.errorMessage = error instanceof Error
+        ? error.message
+        : this.i18n.t('errors.photoCaptureFailed');
     }
   }
 
@@ -87,11 +94,6 @@ export class RegisterPage {
     });
   }
 
-  constructor(
-    private readonly auth: Auth,
-    private readonly router: Router,
-  ) {}
-
   async submit(): Promise<void> {
     this.errorMessage = '';
 
@@ -103,22 +105,22 @@ export class RegisterPage {
       !this.password ||
       !this.photoDataUrl
     ) {
-      this.errorMessage = 'Veuillez remplir tous les champs et prendre une photo.';
+      this.errorMessage = this.i18n.t('errors.fillAllFields');
       return;
     }
 
     if (this.age < 13 || this.age > 120) {
-      this.errorMessage = 'L’âge doit être compris entre 13 et 120 ans.';
+      this.errorMessage = this.i18n.t('errors.ageRange');
       return;
     }
 
     if (this.password.length < 6) {
-      this.errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
+      this.errorMessage = this.i18n.t('errors.passwordLength');
       return;
     }
 
     if (this.password !== this.confirmPassword) {
-      this.errorMessage = 'Les mots de passe ne correspondent pas.';
+      this.errorMessage = this.i18n.t('errors.passwordMismatch');
       return;
     }
 
@@ -147,20 +149,20 @@ export class RegisterPage {
 
     switch (code) {
       case 'auth/email-already-in-use':
-        return 'Cette adresse e-mail existe déjà. Utilisez une autre adresse ou connectez-vous avec ce compte.';
+        return this.i18n.t('errors.emailInUse');
       case 'auth/invalid-email':
-        return 'L’adresse e-mail est invalide.';
+        return this.i18n.t('errors.invalidEmail');
       case 'auth/weak-password':
-        return 'Le mot de passe est trop faible.';
+        return this.i18n.t('errors.weakPassword');
       case 'auth/password-does-not-meet-requirements':
-        return 'Le mot de passe ne respecte pas les exigences Firebase.';
+        return this.i18n.t('errors.passwordRequirements');
       case 'auth/operation-not-allowed':
-        return 'L’inscription par e-mail/mot de passe n’est pas activée dans Firebase Authentication.';
+        return this.i18n.t('errors.operationNotAllowed');
       case 'auth/network-request-failed':
-        return 'Impossible de contacter Firebase. Vérifiez votre connexion.';
+        return this.i18n.t('errors.network');
       default:
         console.error('Erreur Firebase inscription :', error);
-        return 'La création du compte a échoué. Consultez la console pour le code Firebase.';
+        return this.i18n.t('errors.registerFailed');
     }
   }
 }

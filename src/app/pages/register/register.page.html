@@ -1,63 +1,69 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Inscription</ion-title>
+    <ion-title>{{ 'register.title' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <form class="auth-form" (ngSubmit)="submit()">
-    <h1>Créer un compte</h1>
-    <p>Créez votre profil pour enregistrer vos films favoris.</p>
+    <h1>{{ 'register.heading' | translate }}</h1>
+    <p>{{ 'register.subtitle' | translate }}</p>
 
     <ion-item>
-      <ion-label position="stacked">Prénom</ion-label>
+      <ion-label position="stacked">{{ 'common.firstName' | translate }}</ion-label>
       <ion-input name="firstName" [(ngModel)]="firstName" autocomplete="given-name" required />
     </ion-item>
 
     <ion-item>
-      <ion-label position="stacked">Nom</ion-label>
+      <ion-label position="stacked">{{ 'common.lastName' | translate }}</ion-label>
       <ion-input name="lastName" [(ngModel)]="lastName" autocomplete="family-name" required />
     </ion-item>
 
     <ion-item>
-      <ion-label position="stacked">Âge</ion-label>
+      <ion-label position="stacked">{{ 'common.age' | translate }}</ion-label>
       <ion-input name="age" type="number" [(ngModel)]="age" min="13" max="120" required />
     </ion-item>
 
     <ion-item>
-      <ion-label position="stacked">E-mail</ion-label>
+      <ion-label position="stacked">{{ 'common.email' | translate }}</ion-label>
       <ion-input name="email" type="email" [(ngModel)]="email" autocomplete="email" required />
     </ion-item>
 
     <ion-item>
-      <ion-label position="stacked">Mot de passe</ion-label>
+      <ion-label position="stacked">{{ 'common.password' | translate }}</ion-label>
       <ion-input name="password" type="password" [(ngModel)]="password" autocomplete="new-password" required />
     </ion-item>
 
     <ion-item>
-      <ion-label position="stacked">Confirmer le mot de passe</ion-label>
+      <ion-label position="stacked">{{ 'register.confirmPassword' | translate }}</ion-label>
       <ion-input name="confirmPassword" type="password" [(ngModel)]="confirmPassword" autocomplete="new-password" required />
     </ion-item>
 
     <ion-button expand="block" type="button" fill="outline" (click)="takePhoto()">
-      {{ photoDataUrl ? 'Reprendre la photo' : 'Prendre une photo' }}
+      {{ (photoDataUrl ? 'register.retakePhoto' : 'register.takePhoto') | translate }}
     </ion-button>
     @if (photoDataUrl) {
-      <img class="photo-preview" [src]="photoDataUrl" alt="Aperçu de la photo de profil" />
+      <img class="photo-preview" [src]="photoDataUrl" [alt]="'register.photoPreviewAlt' | translate" />
     }
 
-    <ion-text color="danger" *ngIf="errorMessage">
-      <p class="error-message">{{ errorMessage }}</p>
-    </ion-text>
+    @if (errorMessage) {
+      <ion-text color="danger">
+        <p class="error-message">{{ errorMessage }}</p>
+      </ion-text>
+    }
 
     <ion-button expand="block" type="submit" [disabled]="isSubmitting">
-      <ion-spinner *ngIf="isSubmitting" name="crescent" />
-      <span *ngIf="!isSubmitting">Créer mon compte</span>
+      @if (isSubmitting) {
+        <ion-spinner name="crescent" />
+      }
+      @if (!isSubmitting) {
+        <span>{{ 'register.submit' | translate }}</span>
+      }
     </ion-button>
 
     <p class="link-line">
-      Vous avez déjà un compte ?
-      <a routerLink="/login">Se connecter</a>
+      {{ 'register.haveAccount' | translate }}
+      <a routerLink="/login">{{ 'register.signIn' | translate }}</a>
     </p>
   </form>
 </ion-content>
