@@ -31,7 +31,14 @@
         </ion-card-content>
       </ion-card>
     } @empty {
-      <ion-text><p>Aucun utilisateur n'atteint 75 % de correspondance pour le moment.</p></ion-text>
+      <ion-text>
+        <p>Aucun utilisateur ne dépasse 75 % de correspondance pour le moment.</p>
+        <p>
+          Vos favoris : {{ myFavoritesCount() }} ·
+          Utilisateurs comparés : {{ checkedUsersCount() }} ·
+          Meilleur taux : {{ bestRate() }} %
+        </p>
+      </ion-text>
     }
   }
 </ion-content>

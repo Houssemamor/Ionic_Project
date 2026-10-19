@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Favorite } from '../../services/favorite';
+import { Movie as FirestoreMovie } from '../../services/movie';
 import { Movie as MovieModel } from '../../models/movie.model';
 import { TmdbService } from '../../services/tmdb.service';
 import {
@@ -20,6 +21,7 @@ import {
 export class MoviesPage implements OnInit {
    readonly tmdb = inject(TmdbService);
   private readonly favorites = inject(Favorite);
+   private readonly firestoreMovies = inject(FirestoreMovie);
 
   movies = signal<MovieModel[]>([]);
   favoriteIds = signal<Set<string>>(new Set());
@@ -31,7 +33,11 @@ export class MoviesPage implements OnInit {
   async ngOnInit(): Promise<void> {
     // les films s'affichent même si les favoris échouent
     try {
-      this.movies.set(await this.tmdb.popular());
+      const [tmdbMovies, storedMovies] = await Promise.all([
+        this.tmdb.popular(),
+        this.firestoreMovies.list(),
+      ]);
+      this.movies.set(this.mergeMovies(tmdbMovies, storedMovies));
     } catch (error) {
       console.error('Erreur TMDB :', error);
       this.errorMessage.set(error instanceof Error ? error.message : 'Impossible de charger les films.');
@@ -54,13 +60,31 @@ export class MoviesPage implements OnInit {
     this.errorMessage.set('');
     try {
       const q = this.search().trim();
-      this.movies.set(q ? await this.tmdb.search(q) : await this.tmdb.popular());
+      const [tmdbMovies, storedMovies] = await Promise.all([
+        q ? this.tmdb.search(q) : this.tmdb.popular(),
+        this.firestoreMovies.list(),
+      ]);
+      const matchingStoredMovies = q
+        ? storedMovies.filter((movie) => movie.title.toLowerCase().includes(q.toLowerCase()))
+        : storedMovies;
+      this.movies.set(this.mergeMovies(tmdbMovies, matchingStoredMovies));
     } catch (error) {
       console.error('Erreur recherche :', error);
       this.errorMessage.set(error instanceof Error ? error.message : 'La recherche a échoué.');
     } finally {
       this.isSearching.set(false);
     }
+  }
+
+  private mergeMovies(primary: MovieModel[], stored: MovieModel[]): MovieModel[] {
+    const result = new Map<string, MovieModel>();
+    for (const movie of [...primary, ...stored]) {
+      const key = movie.tmdbId ? `tmdb-${movie.tmdbId}` : movie.title.trim().toLowerCase();
+      if (!result.has(key)) {
+        result.set(key, movie);
+      }
+    }
+    return [...result.values()];
   }
 
   async toggleFavorite(movie: MovieModel): Promise<void> {

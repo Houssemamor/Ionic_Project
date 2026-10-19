@@ -16,6 +16,7 @@ import {
   updateDoc,
 } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
+import { Capacitor } from '@capacitor/core';
 import { FirebaseService } from './firebase.service';
 import { UserProfile } from '../models/user.model';
 
@@ -59,13 +60,22 @@ export class Auth {
       ...profile,
       createdAt: serverTimestamp(),
     });
-    const photoReference = ref(this.firebase.storage, `profile-photos/${credential.user.uid}`);
-    await uploadString(photoReference, data.photoDataUrl, 'data_url');
-    const photoUrl = await getDownloadURL(photoReference);
+    // Firebase Storage uploads from localhost require a bucket CORS policy.
+    // Keep web registration usable while Storage is configured, and use Storage
+    // on the native app where the camera requirement applies.
+    const photoUrl = Capacitor.isNativePlatform()
+      ? await this.uploadProfilePhoto(credential.user.uid, data.photoDataUrl)
+      : data.photoDataUrl;
     await updateDoc(doc(this.firebase.firestore, 'users', credential.user.uid), { photoUrl });
     profile.photoUrl = photoUrl;
 
     return profile;
+  }
+
+  private async uploadProfilePhoto(userId: string, photoDataUrl: string): Promise<string> {
+    const photoReference = ref(this.firebase.storage, `profile-photos/${userId}`);
+    await uploadString(photoReference, photoDataUrl, 'data_url');
+    return getDownloadURL(photoReference);
   }
 
   async login(email: string, password: string): Promise<UserProfile> {

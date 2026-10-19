@@ -20,6 +20,8 @@ export class MatchingPage implements OnInit {
 
   matches = signal<MatchResult[]>([]);
   myFavoritesCount = signal(0);
+  checkedUsersCount = signal(0);
+  bestRate = signal(0);
   isLoading = signal(true);
   errorMessage = signal('');
 
@@ -27,6 +29,8 @@ export class MatchingPage implements OnInit {
     try {
       const outcome = await this.matching.findMatches(75);
       this.myFavoritesCount.set(outcome.myFavoritesCount);
+      this.checkedUsersCount.set(outcome.checkedUsersCount);
+      this.bestRate.set(outcome.bestRate);
       this.matches.set(outcome.matches);
     } catch (error) {
       console.error('Erreur matching :', error);

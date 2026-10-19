@@ -21,14 +21,21 @@ async list(): Promise<FavoriteModel[]> {
     where('userId', '==', userId),
   );
   const snapshot = await getDocs(q);
-  console.log('SERVICE: docs =', snapshot.size);
-  return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }) as FavoriteModel);
+  return snapshot.docs.map((item) => {
+    const data = item.data() as FavoriteModel;
+    return {
+      ...data,
+      id: data.movieId ?? data.id ?? item.id,
+      movieId: data.movieId ?? data.id ?? item.id,
+    };
+  });
 }
 
   async add(movie: Movie): Promise<void> {
     const userId = await this.requireUserId();
     await setDoc(doc(this.firebase.firestore, 'favorites', `${userId}_${movie.id}`), {
       ...movie,
+      movieId: movie.id,
       userId,
       addedAt: serverTimestamp(),
     });
@@ -42,7 +49,11 @@ async list(): Promise<FavoriteModel[]> {
 
   async listAll(): Promise<FavoriteModel[]> {
     const snapshot = await getDocs(collection(this.firebase.firestore, 'favorites'));
-    return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }) as FavoriteModel);
+    return snapshot.docs.map((item) => {
+      const data = item.data() as FavoriteModel;
+      const movieId = data.movieId ?? data.id ?? item.id.substring(item.id.indexOf('_') + 1);
+      return { ...data, id: movieId, movieId };
+    });
   }
 
   private async requireUserId(): Promise<string> {

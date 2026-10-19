@@ -1,8 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Favorite } from '../../services/favorite';
 import { Movie } from '../../models/movie.model';
 import { TmdbService } from '../../services/tmdb.service';
+import { Movie as FirestoreMovie } from '../../services/movie';
 import {
   IonButton, IonCard, IonCardContent, IonCardTitle, IonContent,
   IonHeader, IonSpinner, IonText, IonTitle, IonToolbar,
@@ -14,12 +15,14 @@ import {
   styleUrls: ['./movie-details.page.scss'],
   imports: [
     IonButton, IonCard, IonCardContent, IonCardTitle, IonContent,
-    IonHeader, IonSpinner, IonText, IonTitle, IonToolbar, RouterLink,
+    IonHeader, IonSpinner, IonText, IonTitle, IonToolbar,
   ],
 })
 export class MovieDetailsPage implements OnInit {
-  private readonly route = inject(ActivatedRoute);
+  private readonly route = inject(ActivatedRoute, { optional: true });
+  private readonly router = inject(Router);
   private readonly favorites = inject(Favorite);
+  private readonly firestoreMovies = inject(FirestoreMovie);
   readonly tmdb = inject(TmdbService);
 
   movie = signal<Movie | null>(null);
@@ -29,19 +32,23 @@ export class MovieDetailsPage implements OnInit {
 
   async ngOnInit(): Promise<void> {
     try {
-      const rawId = this.route.snapshot.paramMap.get('id') ?? '';
-      // accepte "tmdb-1423191" comme "1423191"
+      const rawId = this.route?.snapshot.paramMap.get('id') ?? '';
+      let movie: Movie;
       const tmdbId = Number(rawId.replace(/^tmdb-/, ''));
-      if (!Number.isInteger(tmdbId) || tmdbId <= 0) {
-        throw new Error('Identifiant de film invalide.');
+      if (rawId.startsWith('tmdb-') || (Number.isInteger(tmdbId) && tmdbId > 0)) {
+        movie = await this.tmdb.details(tmdbId);
+      } else {
+        const storedMovie = await this.firestoreMovies.get(rawId);
+        if (!storedMovie) {
+          throw new Error('Film introuvable dans la base de données.');
+        }
+        movie = storedMovie;
       }
-
-      const movie = await this.tmdb.details(tmdbId);
       this.movie.set(movie);
 
       try {
         const favs = await this.favorites.list();
-        this.isFavorite.set(favs.some((f) => f.id.endsWith(`_${movie.id}`)));
+        this.isFavorite.set(favs.some((f) => (f.movieId ?? f.id) === movie.id));
       } catch (error) {
         console.error('Erreur favoris :', error);
       }
@@ -73,5 +80,9 @@ export class MovieDetailsPage implements OnInit {
         error instanceof Error ? error.message : 'Impossible de modifier les favoris.'
       );
     }
+  }
+
+  goBackToMovies(): void {
+    void this.router.navigateByUrl('/movies');
   }
 }

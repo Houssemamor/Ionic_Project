@@ -12,6 +12,8 @@ export interface MatchResult {
 export interface MatchingOutcome {
   myFavoritesCount: number;
   matches: MatchResult[];
+  checkedUsersCount: number;
+  bestRate: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -33,7 +35,9 @@ export class Matching {
     // userId -> (idFilm -> titre)
     const byUser = new Map<string, Map<string, string>>();
     for (const fav of allFavorites) {
-      const movieId = fav.id.replace(`${fav.userId}_`, '');
+      if (!fav.userId) continue;
+      const movieId = this.normalizeMovieId(fav.movieId ?? fav.id, fav.userId);
+      if (!movieId) continue;
       const title = (fav as unknown as { title?: string }).title ?? movieId;
       if (!byUser.has(fav.userId)) {
         byUser.set(fav.userId, new Map());
@@ -43,21 +47,25 @@ export class Matching {
 
     const mine = byUser.get(me.uid) ?? new Map<string, string>();
     if (mine.size === 0) {
-      return { myFavoritesCount: 0, matches: [] };
+      return { myFavoritesCount: 0, matches: [], checkedUsersCount: 0, bestRate: 0 };
     }
 
     const matches: MatchResult[] = [];
+    let checkedUsersCount = 0;
+    let bestRate = 0;
     for (const user of users) {
       if (user.id === me.uid || !user.active) continue;
 
       const theirs = byUser.get(user.id);
       if (!theirs || theirs.size === 0) continue;
+      checkedUsersCount++;
 
       const commonIds = [...mine.keys()].filter((id) => theirs.has(id));
       const unionSize = new Set([...mine.keys(), ...theirs.keys()]).size;
       const rate = (commonIds.length / unionSize) * 100;
+      bestRate = Math.max(bestRate, rate);
 
-      if (rate >= threshold) {
+      if (rate > threshold) {
         matches.push({
           user,
           rate: Math.round(rate),
@@ -67,6 +75,23 @@ export class Matching {
     }
 
     matches.sort((a, b) => b.rate - a.rate);
-    return { myFavoritesCount: mine.size, matches };
+    return {
+      myFavoritesCount: mine.size,
+      matches,
+      checkedUsersCount,
+      bestRate: Math.round(bestRate),
+    };
+  }
+
+  private normalizeMovieId(value: string | number | undefined, userId?: string): string {
+    if (value === undefined || value === null) return '';
+    let id = String(value).trim();
+    if (userId && id.startsWith(`${userId}_`)) {
+      id = id.substring(userId.length + 1);
+    }
+    if (id.startsWith('tmdb-')) {
+      id = id.substring('tmdb-'.length);
+    }
+    return id;
   }
 }

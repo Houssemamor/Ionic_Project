@@ -9,7 +9,7 @@
     <div class="ion-text-center ion-padding"><ion-spinner></ion-spinner></div>
   } @else if (errorMessage() && !movie()) {
     <ion-text color="danger"><p>{{ errorMessage() }}</p></ion-text>
-    <ion-button routerLink="/movies">Retour aux films</ion-button>
+    <ion-button (click)="goBackToMovies()">Retour aux films</ion-button>
   } @else if (movie(); as m) {
     @if (errorMessage()) {
       <ion-text color="danger"><p>{{ errorMessage() }}</p></ion-text>
@@ -30,7 +30,7 @@
         <ion-button [color]="isFavorite() ? 'danger' : 'medium'" (click)="toggleFavorite()">
           {{ isFavorite() ? '♥ Retirer des favoris' : '♡ Ajouter aux favoris' }}
         </ion-button>
-        <ion-button fill="outline" routerLink="/movies">Retour</ion-button>
+        <ion-button fill="outline" (click)="goBackToMovies()">Retour</ion-button>
       </ion-card-content>
     </ion-card>
   }

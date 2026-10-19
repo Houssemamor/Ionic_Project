@@ -1,37 +1,79 @@
 /*
- * App Global CSS
- * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
+ * Styles globaux de l'application.
+ * Ils s'appliquent à toutes les pages et ne sont pas limités à un composant.
  */
 
-/* Core CSS required for Ionic components to work properly */
+// Styles de base nécessaires au fonctionnement des composants Ionic.
 @import "@ionic/angular/css/core.css";
-
-/* Basic CSS for apps built with Ionic */
 @import "@ionic/angular/css/normalize.css";
 @import "@ionic/angular/css/structure.css";
 @import "@ionic/angular/css/typography.css";
 @import "@ionic/angular/css/display.css";
 
-/* Optional CSS utils that can be commented out */
+// Classes utilitaires Ionic : espacements, alignement et flexbox.
 @import "@ionic/angular/css/padding.css";
 @import "@ionic/angular/css/float-elements.css";
 @import "@ionic/angular/css/text-alignment.css";
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
+// Active automatiquement le thème sombre selon les préférences du système.
+@import "@ionic/angular/css/palettes/dark.system.css";
 
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+// La page occupe toute la fenêtre du navigateur.
+html,
+body,
+app-root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+// Centre le téléphone et ajoute un arrière-plan visible autour de lui.
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #e8edf5;
+}
+
+// Empêche le conteneur racine de dépasser les limites de la fenêtre.
+app-root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+// Apparence du téléphone sur ordinateur : dimensions, bordure et ombre.
+ion-app.phone-frame {
+  position: relative;
+  inset: auto;
+  width: 390px;
+  height: 844px;
+  max-width: calc(100vw - 48px);
+  max-height: calc(100vh - 48px);
+  overflow: hidden;
+  border: 8px solid #202938;
+  border-radius: 36px;
+  box-shadow: 0 20px 50px rgb(15 23 42 / 25%);
+}
+
+// Sur un petit écran, le cadre devient une application plein écran.
+@media (max-width: 480px), (max-height: 700px) {
+  app-root {
+    padding: 0;
+  }
+
+  ion-app.phone-frame {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    border-width: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}

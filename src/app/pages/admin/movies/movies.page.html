@@ -1,27 +1,83 @@
+<!-- En-tête principal de la page d'administration. -->
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>Gestion des films</ion-title>
   </ion-toolbar>
 </ion-header>
 
+<!-- Contenu scrollable de la page de gestion des films. -->
 <ion-content [fullscreen]="true">
+  <!-- En-tête compact affiché pendant le défilement sur certains appareils. -->
   <ion-header collapse="condense">
     <ion-toolbar>
       <ion-title size="large">Gestion des films</ion-title>
     </ion-toolbar>
   </ion-header>
 
+  <!-- Champs du formulaire utilisés pour créer un film. -->
   <ion-item><ion-label position="stacked">Titre</ion-label><ion-input [(ngModel)]="title"></ion-input></ion-item>
   <ion-item><ion-label position="stacked">Synopsis</ion-label><ion-input [(ngModel)]="overview"></ion-input></ion-item>
   <ion-item><ion-label position="stacked">Date de sortie</ion-label><ion-input type="date" [(ngModel)]="releaseDate"></ion-input></ion-item>
   <ion-item><ion-label position="stacked">URL de l'affiche</ion-label><ion-input [(ngModel)]="posterPath"></ion-input></ion-item>
   <ion-item><ion-label position="stacked">Genres séparés par des virgules</ion-label><ion-input [(ngModel)]="genresText"></ion-input></ion-item>
+
+  <!-- Lance l'ajout et reste désactivé pendant l'enregistrement. -->
   <ion-button expand="block" [disabled]="isSaving" (click)="addMovie()">Ajouter le film</ion-button>
-  <ion-text color="danger" *ngIf="errorMessage"><p>{{ errorMessage }}</p></ion-text>
+
+  <!-- Messages d'état de l'ajout ou du chargement. -->
+  @if (isSaving) {
+    <ion-text><p>Enregistrement du film en cours...</p></ion-text>
+  }
+  @if (successMessage) {
+    <ion-text color="success"><p>{{ successMessage }}</p></ion-text>
+  }
+  @if (errorMessage) {
+    <ion-text color="danger"><p>{{ errorMessage }}</p></ion-text>
+  }
+  <ion-text><h2>Films ajoutés par l'administrateur</h2></ion-text>
+  @if (isLoading) {
+    <ion-text><p>Chargement des films...</p></ion-text>
+  }
+  @if (!isLoading && errorMessage) {
+    <ion-button fill="outline" (click)="loadMovies()">Réessayer le chargement</ion-button>
+  }
+  @if (!isLoading && movies.length === 0) {
+    <ion-text color="medium"><p>Aucun film ajouté pour le moment.</p></ion-text>
+  }
+
+  <!-- Sélection explicite d'un film à supprimer. -->
+  <ion-item>
+    <ion-label>Supprimer un film</ion-label>
+    <ion-select
+      [(ngModel)]="selectedMovieId"
+      placeholder="Choisir un film"
+      [disabled]="isLoading || movies.length === 0 || isDeletingMovieId !== null">
+      @for (movie of movies; track movie.id) {
+        <ion-select-option [value]="movie.id">{{ movie.title }}</ion-select-option>
+      }
+    </ion-select>
+  </ion-item>
+
+  <!-- Supprime le film choisi après confirmation. -->
+  <ion-button
+    expand="block"
+    color="danger"
+    [disabled]="!selectedMovieId || isDeletingMovieId !== null"
+    (click)="deleteSelectedMovie()">
+    Supprimer le film sélectionné
+  </ion-button>
+
+  <!-- Affiche chaque film et fournit également une suppression directe par ligne. -->
   <ion-list *ngIf="!isLoading">
     <ion-item *ngFor="let movie of movies">
       <ion-label><h2>{{ movie.title }}</h2><p>{{ movie.overview }}</p></ion-label>
-      <ion-button slot="end" color="danger" (click)="deleteMovie(movie)">Supprimer</ion-button>
+      <ion-button
+        slot="end"
+        color="danger"
+        [disabled]="isDeletingMovieId !== null"
+        (click)="deleteMovie(movie)">
+        {{ isDeletingMovieId === movie.id ? 'Suppression...' : 'Supprimer' }}
+      </ion-button>
     </ion-item>
   </ion-list>
 </ion-content>

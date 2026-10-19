@@ -59,10 +59,32 @@ export class RegisterPage {
       if (!photo.dataUrl) {
         throw new Error('La photo n’a pas pu être récupérée.');
       }
-      this.photoDataUrl = photo.dataUrl;
+      this.photoDataUrl = await this.optimizePhoto(photo.dataUrl);
     } catch (error) {
       this.errorMessage = error instanceof Error ? error.message : 'Impossible de prendre la photo.';
     }
+  }
+
+  private optimizePhoto(dataUrl: string): Promise<string> {
+    return new Promise((resolve) => {
+      const image = new Image();
+      image.onload = () => {
+        const maxSize = 512;
+        const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+        const context = canvas.getContext('2d');
+        if (!context) {
+          resolve(dataUrl);
+          return;
+        }
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.78));
+      };
+      image.onerror = () => resolve(dataUrl);
+      image.src = dataUrl;
+    });
   }
 
   constructor(
@@ -125,13 +147,20 @@ export class RegisterPage {
 
     switch (code) {
       case 'auth/email-already-in-use':
-        return 'Cette adresse e-mail est déjà utilisée.';
+        return 'Cette adresse e-mail existe déjà. Utilisez une autre adresse ou connectez-vous avec ce compte.';
       case 'auth/invalid-email':
         return 'L’adresse e-mail est invalide.';
       case 'auth/weak-password':
         return 'Le mot de passe est trop faible.';
+      case 'auth/password-does-not-meet-requirements':
+        return 'Le mot de passe ne respecte pas les exigences Firebase.';
+      case 'auth/operation-not-allowed':
+        return 'L’inscription par e-mail/mot de passe n’est pas activée dans Firebase Authentication.';
+      case 'auth/network-request-failed':
+        return 'Impossible de contacter Firebase. Vérifiez votre connexion.';
       default:
-        return error instanceof Error ? error.message : 'La création du compte a échoué.';
+        console.error('Erreur Firebase inscription :', error);
+        return 'La création du compte a échoué. Consultez la console pour le code Firebase.';
     }
   }
 }
