@@ -1,26 +1,59 @@
-.auth-form {
-  max-width: 520px;
-  margin: 0 auto;
-  padding: 32px 20px;
+// Page de connexion : le diaporama occupe le haut, le formulaire se pose
+// par-dessus avec un panneau arrondi. Les couleurs restent des jetons Ionic
+// pour suivre le theme clair ou sombre.
+.login-content {
+  --background: var(--ion-background-color);
 }
 
-.auth-form h1 {
-  margin-bottom: 8px;
+.login-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.auth-panel {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  margin-top: -24px;
+  padding: 24px 20px 32px;
+  border-radius: 24px 24px 0 0;
+  background: var(--ion-background-color);
+  box-shadow: 0 -6px 20px rgb(0 0 0 / 14%);
+}
+
+.auth-panel h1 {
+  margin: 0 0 4px;
+  font-size: 1.6rem;
+}
+
+.subtitle {
+  margin: 0 0 16px;
+  color: var(--ion-color-medium);
+  font-size: 0.9rem;
 }
 
 .auth-form ion-item {
-  margin-top: 16px;
+  margin-top: 12px;
+  --background: var(--ion-color-light);
+  --border-radius: 12px;
+  --padding-start: 12px;
+  --inner-padding-end: 12px;
 }
 
-.auth-form ion-button {
-  margin-top: 24px;
+.auth-form ion-button[type='submit'] {
+  height: 46px;
+  margin-top: 20px;
+  --border-radius: 12px;
 }
 
 .error-message {
-  margin: 16px 0 0;
+  margin: 12px 0 0;
+  font-size: 0.85rem;
 }
 
 .link-line {
+  margin: 20px 0 0;
   text-align: center;
-  margin-top: 24px;
+  font-size: 0.9rem;
 }

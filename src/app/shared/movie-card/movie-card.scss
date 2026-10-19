@@ -50,6 +50,41 @@ ion-card {
   color: var(--ion-color-warning);
 }
 
+// Bouton de refus superpose a l'affiche en mode grille. Le fond opaque garde
+// l'icone lisible quelle que soit l'image.
+.poster-wrapper .dislike-toggle {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 72%);
+  color: #fff;
+  cursor: pointer;
+}
+
+.poster-wrapper .dislike-toggle ion-icon {
+  font-size: 20px;
+}
+
+.poster-wrapper .dislike-toggle.active,
+.icon-button.dislike-toggle.active {
+  background: var(--ion-color-medium);
+  color: var(--ion-color-medium-contrast);
+}
+
+.dislike-toggle:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+}
+
 .rating {
   display: flex;
   align-items: center;

@@ -4,6 +4,7 @@ export interface Movie {
   title: string;
   overview: string;
   posterPath?: string;
+  backdropPath?: string;
   releaseDate?: string;
   voteAverage?: number;
   genres?: string[];

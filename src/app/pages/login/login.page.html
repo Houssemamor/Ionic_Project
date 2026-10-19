@@ -1,54 +1,54 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>{{ 'login.title' | translate }}</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="login-content">
+  <div class="login-shell">
+    <app-login-hero />
 
-<ion-content [fullscreen]="true">
-  <form class="auth-form" (ngSubmit)="submit()">
-    <h1>{{ 'login.heading' | translate }}</h1>
-    <p>{{ 'login.subtitle' | translate }}</p>
+    <section class="auth-panel">
+      <h1>{{ 'login.heading' | translate }}</h1>
+      <p class="subtitle">{{ 'login.subtitle' | translate }}</p>
 
-    <ion-item>
-      <ion-label position="stacked">{{ 'common.email' | translate }}</ion-label>
-      <ion-input
-        name="email"
-        type="email"
-        autocomplete="email"
-        [(ngModel)]="email"
-        required
-      />
-    </ion-item>
+      <form class="auth-form" (ngSubmit)="submit()">
+        <ion-item>
+          <ion-label position="stacked">{{ 'common.email' | translate }}</ion-label>
+          <ion-input
+            name="email"
+            type="email"
+            autocomplete="email"
+            [(ngModel)]="email"
+            required
+          />
+        </ion-item>
 
-    <ion-item>
-      <ion-label position="stacked">{{ 'common.password' | translate }}</ion-label>
-      <ion-input
-        name="password"
-        type="password"
-        autocomplete="current-password"
-        [(ngModel)]="password"
-        required
-      />
-    </ion-item>
+        <ion-item>
+          <ion-label position="stacked">{{ 'common.password' | translate }}</ion-label>
+          <ion-input
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            [(ngModel)]="password"
+            required
+          />
+        </ion-item>
 
-    <ion-text color="danger">
-      @if (errorMessage) {
-        <p class="error-message">{{ errorMessage }}</p>
-      }
-    </ion-text>
+        <ion-text color="danger">
+          @if (errorMessage) {
+            <p class="error-message">{{ errorMessage }}</p>
+          }
+        </ion-text>
 
-    <ion-button expand="block" type="submit" [disabled]="isSubmitting">
-      @if (isSubmitting) {
-        <ion-spinner name="crescent" />
-      }
-      @if (!isSubmitting) {
-        <span>{{ 'login.submit' | translate }}</span>
-      }
-    </ion-button>
+        <ion-button expand="block" type="submit" [disabled]="isSubmitting">
+          @if (isSubmitting) {
+            <ion-spinner name="crescent" />
+          }
+          @if (!isSubmitting) {
+            <span>{{ 'login.submit' | translate }}</span>
+          }
+        </ion-button>
 
-    <p class="link-line">
-      {{ 'login.noAccount' | translate }}
-      <a routerLink="/register">{{ 'login.createAccount' | translate }}</a>
-    </p>
-  </form>
+        <p class="link-line">
+          {{ 'login.noAccount' | translate }}
+          <a routerLink="/register">{{ 'login.createAccount' | translate }}</a>
+        </p>
+      </form>
+    </section>
+  </div>
 </ion-content>

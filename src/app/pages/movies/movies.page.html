@@ -68,8 +68,11 @@
           [movie]="movie"
           [view]="view()"
           [isFavorite]="favoriteIds().has('' + movie.id)"
+          [showDislike]="true"
+          [isDisliked]="dislikedIds().has('' + movie.id)"
           favoriteAction="favorite"
-          (actionToggled)="toggleFavorite($event)" />
+          (actionToggled)="toggleFavorite($event)"
+          (dislikeToggled)="toggleDislike($event)" />
       } @empty {
         <ion-text><p>{{ 'movies.empty' | translate }}</p></ion-text>
       }

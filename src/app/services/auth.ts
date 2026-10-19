@@ -20,6 +20,10 @@ import { Capacitor } from '@capacitor/core';
 import { FirebaseService } from './firebase.service';
 import { UserProfile } from '../models/user.model';
 import { TranslationService } from '../i18n/translation.service';
+import {
+  PROFILE_PHOTO_MAX_DATA_URL_LENGTH,
+  ProfilePhotoTooLargeError,
+} from '../shared/photo';
 
 export interface RegisterData {
   firstName: string;
@@ -78,6 +82,26 @@ export class Auth {
     const photoReference = ref(this.firebase.storage, `profile-photos/${userId}`);
     await uploadString(photoReference, photoDataUrl, 'data_url');
     return getDownloadURL(photoReference);
+  }
+
+  /**
+   * Met a jour la photo de profil sans Firebase Storage. La data URL est
+   * deja compressee par l'appelant et validee contre la limite Firestore.
+   */
+  async updateProfilePhoto(photoDataUrl: string): Promise<string> {
+    if (photoDataUrl.length > PROFILE_PHOTO_MAX_DATA_URL_LENGTH) {
+      throw new ProfilePhotoTooLargeError();
+    }
+
+    const user = await this.waitForAuthState();
+    if (!user) {
+      throw new Error(this.i18n.t('errors.notLoggedIn'));
+    }
+
+    await updateDoc(doc(this.firebase.firestore, 'users', user.uid), {
+      photoUrl: photoDataUrl,
+    });
+    return photoDataUrl;
   }
 
   async login(email: string, password: string): Promise<UserProfile> {

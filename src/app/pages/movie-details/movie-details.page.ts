@@ -1,6 +1,8 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Favorite } from '../../services/favorite';
+import { Dislike } from '../../services/dislike';
+import { MovieReactions } from '../../services/movie-reactions';
 import { Movie } from '../../models/movie.model';
 import { TmdbService } from '../../services/tmdb.service';
 import { Movie as FirestoreMovie } from '../../services/movie';
@@ -25,12 +27,15 @@ export class MovieDetailsPage implements OnInit {
   private readonly route = inject(ActivatedRoute, { optional: true });
   private readonly router = inject(Router);
   private readonly favorites = inject(Favorite);
+  private readonly dislikes = inject(Dislike);
+  private readonly reactions = inject(MovieReactions);
   private readonly firestoreMovies = inject(FirestoreMovie);
   private readonly i18n = inject(TranslationService);
   readonly tmdb = inject(TmdbService);
 
   movie = signal<Movie | null>(null);
   isFavorite = signal(false);
+  isDisliked = signal(false);
   isLoading = signal(true);
   errorMessage = signal('');
 
@@ -50,11 +55,23 @@ export class MovieDetailsPage implements OnInit {
       }
       this.movie.set(movie);
 
-      try {
-        const favs = await this.favorites.list();
-        this.isFavorite.set(favs.some((f) => (f.movieId ?? f.id) === movie.id));
-      } catch (error) {
-        console.error('Erreur favoris :', error);
+      const [favoritesResult, dislikesResult] = await Promise.allSettled([
+        this.favorites.list(),
+        this.dislikes.list(),
+      ]);
+      if (favoritesResult.status === 'fulfilled') {
+        this.isFavorite.set(
+          favoritesResult.value.some((f) => (f.movieId ?? f.id) === movie.id),
+        );
+      } else {
+        console.error('Erreur favoris :', favoritesResult.reason);
+      }
+      if (dislikesResult.status === 'fulfilled') {
+        this.isDisliked.set(
+          dislikesResult.value.some((f) => (f.movieId ?? f.id) === movie.id),
+        );
+      } else {
+        console.error('Erreur preferences de recommandation :', dislikesResult.reason);
       }
     } catch (error) {
       console.error('Erreur details :', error);
@@ -72,15 +89,37 @@ export class MovieDetailsPage implements OnInit {
     this.errorMessage.set('');
     try {
       if (this.isFavorite()) {
-        await this.favorites.remove(movie.id);
+        await this.reactions.removeFavorite(movie.id);
         this.isFavorite.set(false);
       } else {
-        await this.favorites.add(movie);
+        await this.reactions.addFavorite(movie);
         this.isFavorite.set(true);
+        this.isDisliked.set(false);
       }
     } catch (error) {
       console.error('Erreur favori :', error);
       this.errorMessage.set(this.i18n.t('errors.favoriteToggle'));
+    }
+  }
+
+  async toggleDislike(): Promise<void> {
+    const movie = this.movie();
+    if (!movie) {
+      return;
+    }
+    this.errorMessage.set('');
+    try {
+      if (this.isDisliked()) {
+        await this.reactions.removeDislike(movie.id);
+        this.isDisliked.set(false);
+      } else {
+        await this.reactions.addDislike(movie);
+        this.isDisliked.set(true);
+        this.isFavorite.set(false);
+      }
+    } catch (error) {
+      console.error('Erreur preference de recommandation :', error);
+      this.errorMessage.set(this.i18n.t('errors.dislikeToggle'));
     }
   }
 

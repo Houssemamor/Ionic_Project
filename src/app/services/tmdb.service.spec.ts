@@ -106,6 +106,31 @@ describe('TmdbService language', () => {
     expect(result).toEqual({ genreName: '', movies: [] });
     http.expectNone(() => true);
   });
+
+  it('trie les films a l affiche par note et ignore ceux sans image', async () => {
+    i18n.setLanguage('en');
+    const promise = service.nowPlayingHighlights(3);
+
+    const request = http.expectOne((value) => value.url.endsWith('/movie/now_playing'));
+    expect(request.request.params.get('language')).toBe('en-US');
+    request.flush({
+      results: [
+        tmdbMovie(1, 6.5, '/one.jpg'),
+        { ...tmdbMovie(2, 9.9, null), backdrop_path: null },
+        tmdbMovie(3, 8.1, '/three.jpg'),
+        { ...tmdbMovie(4, 7.2, null), backdrop_path: '/four-backdrop.jpg' },
+        tmdbMovie(5, 9, '/five.jpg'),
+      ],
+    });
+    await nextTask();
+
+    const genres = http.expectOne((value) => value.url.endsWith('/genre/movie/list'));
+    genres.flush({ genres: [] });
+    const movies = await promise;
+
+    expect(movies.map((movie) => movie.tmdbId)).toEqual([5, 3, 4]);
+    expect(movies[2].backdropPath).toContain('/four-backdrop.jpg');
+  });
 });
 
 /** Laisse le service poursuivre apres une reponse HTTP (resolution de promesse). */
@@ -114,13 +139,13 @@ function nextTask(): Promise<void> {
 }
 
 /** Fabrique une reponse TMDB minimale. */
-function tmdbMovie(id: number) {
+function tmdbMovie(id: number, voteAverage = 7, posterPath: string | null = null) {
   return {
     id,
     title: `Film ${id}`,
     overview: '',
-    poster_path: null,
+    poster_path: posterPath,
     release_date: '2024-01-01',
-    vote_average: 7,
+    vote_average: voteAverage,
   };
 }

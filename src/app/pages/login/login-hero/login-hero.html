@@ -1,0 +1,79 @@
+<section
+  class="hero"
+  role="region"
+  [attr.aria-label]="'login.heroSlides' | translate"
+  (pointerenter)="pauseOnHover()"
+  (pointerleave)="resumeAfterHover()"
+  (focusin)="pauseOnFocus()"
+  (focusout)="resumeAfterFocus()">
+
+  <div class="hero-slides" aria-live="off">
+    @for (movie of slides(); track movie.id; let i = $index) {
+      <div
+        class="hero-slide"
+        [class.active]="i === activeIndex()"
+        [attr.aria-hidden]="i !== activeIndex()">
+        @if (movie.backdropPath || movie.posterPath) {
+          <img [src]="movie.backdropPath ?? movie.posterPath" alt="" />
+        }
+      </div>
+    }
+  </div>
+
+  <div class="hero-scrim" aria-hidden="true"></div>
+
+  <div class="hero-brand">
+    <span class="hero-name">MovieDB</span>
+    <span class="hero-tagline">{{ 'login.heroTagline' | translate }}</span>
+  </div>
+
+  @if (canAutoPlay()) {
+    <button
+      type="button"
+      class="hero-pause"
+      [attr.aria-label]="(isPaused() ? 'login.heroPlay' : 'login.heroPause') | translate"
+      [title]="(isPaused() ? 'login.heroPlay' : 'login.heroPause') | translate"
+      (click)="togglePause()">
+      <ion-icon [name]="isPaused() ? 'play' : 'pause'" aria-hidden="true"></ion-icon>
+    </button>
+  }
+
+  @if (activeMovie(); as movie) {
+    <div class="hero-content">
+      <h2>{{ movie.title }}</h2>
+      <p class="hero-meta">
+        @if (activeYear()) {
+          <span>{{ activeYear() }}</span>
+        }
+        @if (activeRating()) {
+          <span
+            class="hero-rating"
+            role="img"
+            [attr.aria-label]="'card.ratingLabel' | translate: { value: activeRating() }">
+            <ion-icon name="star" aria-hidden="true"></ion-icon>
+            {{ activeRating() }}
+          </span>
+        }
+      </p>
+    </div>
+  }
+
+  @if (!isLoading() && slides().length === 0) {
+    <p class="hero-empty">{{ 'login.heroEmpty' | translate }}</p>
+  }
+
+  @if (slides().length > 1) {
+    <div class="hero-dots">
+      @for (movie of slides(); track movie.id; let i = $index) {
+        <button
+          type="button"
+          class="hero-dot"
+          [class.active]="i === activeIndex()"
+          [attr.aria-label]="'login.heroSlide' | translate: { index: i + 1, total: slides().length }"
+          [attr.aria-current]="i === activeIndex() ? 'true' : null"
+          (click)="selectSlide(i)">
+        </button>
+      }
+    </div>
+  }
+</section>

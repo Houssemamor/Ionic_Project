@@ -1,19 +1,64 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import { MoviesPage } from './movies.page';
 import { Movie } from '../../models/movie.model';
+import { Dislike } from '../../services/dislike';
+import { Favorite } from '../../services/favorite';
+import { Movie as FirestoreMovie } from '../../services/movie';
+import { TmdbService } from '../../services/tmdb.service';
 import { readViewMode } from '../../services/view-preference';
 
 describe('MoviesPage', () => {
   let component: MoviesPage;
   let fixture: ComponentFixture<MoviesPage>;
+  let favoriteAdd: ReturnType<typeof vi.fn>;
+  let favoriteRemove: ReturnType<typeof vi.fn>;
+  let dislikeAdd: ReturnType<typeof vi.fn>;
+  let dislikeRemove: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     // Le mode d'affichage est memorise dans localStorage : on repart d'un
     // etat neutre pour que le test de valeur par defaut reste fiable.
     localStorage.clear();
+    favoriteAdd = vi.fn().mockResolvedValue(undefined);
+    favoriteRemove = vi.fn().mockResolvedValue(undefined);
+    dislikeAdd = vi.fn().mockResolvedValue(undefined);
+    dislikeRemove = vi.fn().mockResolvedValue(undefined);
+
     // RouterLink est utilise par le bouton flottant vers la playlist.
-    TestBed.configureTestingModule({ providers: [provideRouter([])] });
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        {
+          provide: Favorite,
+          useValue: {
+            list: vi.fn().mockResolvedValue([]),
+            add: favoriteAdd,
+            remove: favoriteRemove,
+          },
+        },
+        {
+          provide: Dislike,
+          useValue: {
+            list: vi.fn().mockResolvedValue([]),
+            add: dislikeAdd,
+            remove: dislikeRemove,
+          },
+        },
+        {
+          provide: TmdbService,
+          useValue: {
+            popular: vi.fn().mockResolvedValue([]),
+            search: vi.fn().mockResolvedValue([]),
+          },
+        },
+        {
+          provide: FirestoreMovie,
+          useValue: { list: vi.fn().mockResolvedValue([]) },
+        },
+      ],
+    });
     fixture = TestBed.createComponent(MoviesPage);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -120,5 +165,55 @@ describe('MoviesPage', () => {
     const hiddenLabel = fabButton?.querySelector('.visually-hidden');
     expect(hiddenLabel?.textContent?.trim()).toBe('Voir ma playlist de favoris');
     expect(fabButton?.querySelector('ion-icon')?.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('ajoute un favori et retire le dislike existant', async () => {
+    const movie: Movie = {
+      id: 'tmdb-603',
+      tmdbId: 603,
+      title: 'Amelie',
+      overview: '',
+    };
+    component.dislikedIds.set(new Set([movie.id]));
+
+    await component.toggleFavorite(movie);
+
+    expect(dislikeRemove).toHaveBeenCalledWith(movie.id);
+    expect(favoriteAdd).toHaveBeenCalledWith(movie);
+    expect(component.favoriteIds().has(movie.id)).toBe(true);
+    expect(component.dislikedIds().has(movie.id)).toBe(false);
+  });
+
+  it('ajoute un dislike et retire le favori existant', async () => {
+    const movie: Movie = {
+      id: 'tmdb-550',
+      tmdbId: 550,
+      title: 'Fight Club',
+      overview: '',
+    };
+    component.favoriteIds.set(new Set([movie.id]));
+
+    await component.toggleDislike(movie);
+
+    expect(favoriteRemove).toHaveBeenCalledWith(movie.id);
+    expect(dislikeAdd).toHaveBeenCalledWith(movie);
+    expect(component.favoriteIds().has(movie.id)).toBe(false);
+    expect(component.dislikedIds().has(movie.id)).toBe(true);
+  });
+
+  it('annule un dislike sans toucher au favori', async () => {
+    const movie: Movie = {
+      id: 'tmdb-680',
+      tmdbId: 680,
+      title: 'Pulp Fiction',
+      overview: '',
+    };
+    component.dislikedIds.set(new Set([movie.id]));
+
+    await component.toggleDislike(movie);
+
+    expect(dislikeRemove).toHaveBeenCalledWith(movie.id);
+    expect(favoriteRemove).not.toHaveBeenCalled();
+    expect(component.dislikedIds().has(movie.id)).toBe(false);
   });
 });

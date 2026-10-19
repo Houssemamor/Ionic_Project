@@ -35,10 +35,18 @@
         </p>
         <p>{{ m.overview }}</p>
 
-        <ion-button [color]="isFavorite() ? 'danger' : 'medium'" (click)="toggleFavorite()">
-          {{ (isFavorite() ? 'details.removeFavorite' : 'details.addFavorite') | translate }}
-        </ion-button>
-        <ion-button fill="outline" (click)="goBackToMovies()">{{ 'common.back' | translate }}</ion-button>
+        <div class="details-actions">
+          <ion-button [color]="isFavorite() ? 'danger' : 'medium'" (click)="toggleFavorite()">
+            {{ (isFavorite() ? 'details.removeFavorite' : 'details.addFavorite') | translate }}
+          </ion-button>
+          <ion-button
+            color="medium"
+            [fill]="isDisliked() ? 'solid' : 'outline'"
+            (click)="toggleDislike()">
+            {{ (isDisliked() ? 'details.dislikeRemove' : 'details.dislikeAdd') | translate }}
+          </ion-button>
+          <ion-button fill="outline" (click)="goBackToMovies()">{{ 'common.back' | translate }}</ion-button>
+        </div>
       </ion-card-content>
     </ion-card>
   }

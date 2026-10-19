@@ -11,6 +11,7 @@ interface TmdbMovie {
   title: string;
   overview: string;
   poster_path: string | null;
+  backdrop_path?: string | null;
   release_date: string;
   vote_average: number;
   genre_ids?: number[];
@@ -46,6 +47,20 @@ export class TmdbService {
 
   async search(query: string, page = 1): Promise<Movie[]> {
     return this.request('/search/movie', { query, page, include_adult: false });
+  }
+
+  /**
+   * Selectionne les films actuellement a l'affiche pour le diaporama de
+   * connexion : les mieux notes d'abord, sans doublon visuel sans image.
+   */
+  async nowPlayingHighlights(limit = 5): Promise<Movie[]> {
+    const movies = await this.request('/movie/now_playing', { page: 1 });
+    return movies
+      .filter((movie) => Boolean(movie.backdropPath || movie.posterPath))
+      .sort((a, b) =>
+        (b.voteAverage ?? 0) - (a.voteAverage ?? 0)
+        || (b.releaseDate ?? '').localeCompare(a.releaseDate ?? ''))
+      .slice(0, limit);
   }
 
   async details(id: number): Promise<Movie> {
@@ -186,6 +201,9 @@ export class TmdbService {
       overview: movie.overview || this.i18n.t('movies.noOverview'),
       posterPath: movie.poster_path
         ? `${environment.tmdb.imageBaseUrl}${movie.poster_path}`
+        : undefined,
+      backdropPath: movie.backdrop_path
+        ? `${environment.tmdb.imageBaseUrl}${movie.backdrop_path}`
         : undefined,
       releaseDate: movie.release_date || undefined,
       voteAverage: movie.vote_average,

@@ -8,6 +8,7 @@ import {
   IonContent, IonHeader, IonIcon, IonSpinner, IonText, IonTitle, IonToolbar,
 } from '@ionic/angular';
 import { Auth } from '../services/auth';
+import { Dislike } from '../services/dislike';
 import { Favorite } from '../services/favorite';
 import { TranslatePipe } from '../i18n/translate.pipe';
 import { TmdbService } from '../services/tmdb.service';
@@ -32,6 +33,7 @@ addIcons({
 export class HomePage implements OnInit {
   private readonly auth = inject(Auth);
   private readonly favorites = inject(Favorite);
+  private readonly dislikes = inject(Dislike);
   private readonly tmdb = inject(TmdbService);
   private readonly i18n = inject(TranslationService);
 
@@ -74,19 +76,31 @@ export class HomePage implements OnInit {
 
   /**
    * Recommande trois films du genre le plus present dans les favoris.
+   * Les films deja favoris ou marques "ne pas recommander" sont exclus.
    * La section reste vide si l'utilisateur n'a pas de favoris exploitables.
    */
   private async loadRecommendations(): Promise<void> {
     try {
-      const favorites = await this.favorites.list();
+      // Un echec des dislikes ne doit pas supprimer les recommandations : on
+      // continue alors sans exclusions supplementaires.
+      const [favorites, disliked] = await Promise.all([
+        this.favorites.list(),
+        this.dislikes.list().catch((error) => {
+          console.error('Erreur preferences de recommandation :', error);
+          return [];
+        }),
+      ]);
       const genres = favorites.flatMap((favorite) => favorite.genres ?? []);
       if (genres.length === 0) {
         return;
       }
-      const excluded = favorites
-        .map((favorite) => favorite.tmdbId)
-        .filter((id): id is number => typeof id === 'number');
-      const result = await this.tmdb.recommend(genres, excluded, 3);
+      const excluded = new Set<number>();
+      for (const movie of [...favorites, ...disliked]) {
+        if (typeof movie.tmdbId === 'number') {
+          excluded.add(movie.tmdbId);
+        }
+      }
+      const result = await this.tmdb.recommend(genres, [...excluded], 3);
       this.recommendationGenre.set(result.genreName);
       this.recommendations.set(result.movies);
     } catch (error) {

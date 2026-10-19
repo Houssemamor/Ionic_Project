@@ -45,5 +45,18 @@ service cloud.firestore {
       allow delete: if isSignedIn()
         && resource.data.userId == request.auth.uid;
     }
+
+    // Les films "ne pas recommander" sont prives : seul leur proprietaire peut
+    // les lire, les creer ou les supprimer. La requete cliente filtre donc
+    // obligatoirement sur userId pour satisfaire la regle de liste.
+    match /dislikes/{dislikeId} {
+      allow read: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
+      allow create, update: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.movieId is string;
+      allow delete: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
+    }
   }
 }

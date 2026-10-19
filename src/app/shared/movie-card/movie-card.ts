@@ -2,7 +2,7 @@ import { Component, computed, inject, input, output } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonButton, IonCard, IonIcon } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { heart, heartOutline, informationCircleOutline, star, trashOutline } from 'ionicons/icons';
+import { heart, heartOutline, informationCircleOutline, star, thumbsDown, thumbsDownOutline, trashOutline } from 'ionicons/icons';
 import { Movie } from '../../models/movie.model';
 import { ViewMode } from '../../services/view-preference';
 import { TranslationService } from '../../i18n/translation.service';
@@ -12,7 +12,7 @@ import { TranslatePipe } from '../../i18n/translate.pipe';
 // icones enregistrees ici, sinon il tente un chargement d'asset qui echoue.
 // addIcons enregistre aussi la variante kebab-case (heartOutline devient
 // heart-outline), qui est celle utilisee dans le template.
-addIcons({ heart, heartOutline, informationCircleOutline, star, trashOutline });
+addIcons({ heart, heartOutline, informationCircleOutline, star, thumbsDown, thumbsDownOutline, trashOutline });
 
 // Duree d'appui au-dela de laquelle la carte est consideree comme un appui long.
 const LONG_PRESS_MS = 500;
@@ -38,8 +38,17 @@ export class MovieCardComponent {
   /** 'favorite' pour la liste des films, 'remove' pour la playlist. */
   readonly favoriteAction = input<'favorite' | 'remove'>('favorite');
 
+  /** Affiche le controle "ne pas recommander" sur les listes de decouverte. */
+  readonly showDislike = input(false);
+
+  /** Etat du film dans les preferences de recommandation. */
+  readonly isDisliked = input(false);
+
   /** Emis lorsque l'utilisateur declenche le bouton d'action de la carte. */
   readonly actionToggled = output<Movie>();
+
+  /** Emis lorsque l'utilisateur bascule le refus de recommandation. */
+  readonly dislikeToggled = output<Movie>();
 
   private readonly router = inject(Router);
   private readonly i18n = inject(TranslationService);
@@ -88,6 +97,18 @@ export class MovieCardComponent {
 
   readonly actionColor = computed(() =>
     this.favoriteAction() === 'remove' || this.isFavorite() ? 'danger' : 'medium',
+  );
+
+  /** Libelle accessible et infobulle du refus de recommandation. */
+  readonly dislikeLabel = computed(() =>
+    this.isDisliked()
+      ? this.i18n.t('card.dislikeRemove')
+      : this.i18n.t('card.dislikeAdd'),
+  );
+
+  /** Icone pleine une fois le film exclu, contour sinon. */
+  readonly dislikeIcon = computed(() =>
+    this.isDisliked() ? 'thumbs-down' : 'thumbs-down-outline',
   );
 
   openDetails(): void {

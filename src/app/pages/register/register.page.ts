@@ -17,6 +17,7 @@ import { Auth } from '../../services/auth';
 import { Camera, CameraResultType } from '@capacitor/camera';
 import { TranslationService } from '../../i18n/translation.service';
 import { TranslatePipe } from '../../i18n/translate.pipe';
+import { prepareProfilePhoto, ProfilePhotoTooLargeError } from '../../shared/photo';
 
 @Component({
   selector: 'app-register',
@@ -62,36 +63,15 @@ export class RegisterPage {
         resultType: CameraResultType.DataUrl,
       });
       if (!photo.dataUrl) {
-        throw new Error(this.i18n.t('errors.photoNotRetrieved'));
+        this.errorMessage = this.i18n.t('errors.photoNotRetrieved');
+        return;
       }
-      this.photoDataUrl = await this.optimizePhoto(photo.dataUrl);
+      this.photoDataUrl = await prepareProfilePhoto(photo.dataUrl);
     } catch (error) {
-      this.errorMessage = error instanceof Error
-        ? error.message
+      this.errorMessage = error instanceof ProfilePhotoTooLargeError
+        ? this.i18n.t('errors.photoTooLarge')
         : this.i18n.t('errors.photoCaptureFailed');
     }
-  }
-
-  private optimizePhoto(dataUrl: string): Promise<string> {
-    return new Promise((resolve) => {
-      const image = new Image();
-      image.onload = () => {
-        const maxSize = 512;
-        const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(image.width * scale));
-        canvas.height = Math.max(1, Math.round(image.height * scale));
-        const context = canvas.getContext('2d');
-        if (!context) {
-          resolve(dataUrl);
-          return;
-        }
-        context.drawImage(image, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/jpeg', 0.78));
-      };
-      image.onerror = () => resolve(dataUrl);
-      image.src = dataUrl;
-    });
   }
 
   async submit(): Promise<void> {

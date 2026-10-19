@@ -5,3 +5,14 @@
   width: 100%;
   height: auto;
 }
+
+.details-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.details-actions ion-button {
+  margin: 0;
+}

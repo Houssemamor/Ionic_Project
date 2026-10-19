@@ -3,6 +3,8 @@ import { RouterLink } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { heart } from 'ionicons/icons';
 import { Favorite } from '../../services/favorite';
+import { Dislike } from '../../services/dislike';
+import { MovieReactions } from '../../services/movie-reactions';
 import { Movie as FirestoreMovie } from '../../services/movie';
 import { Movie as MovieModel } from '../../models/movie.model';
 import { TmdbService } from '../../services/tmdb.service';
@@ -35,11 +37,14 @@ addIcons({ heart });
 export class MoviesPage implements OnInit {
   readonly tmdb = inject(TmdbService);
   private readonly favorites = inject(Favorite);
+  private readonly dislikes = inject(Dislike);
+  private readonly reactions = inject(MovieReactions);
   private readonly firestoreMovies = inject(FirestoreMovie);
   private readonly i18n = inject(TranslationService);
 
   movies = signal<MovieModel[]>([]);
   favoriteIds = signal<Set<string>>(new Set());
+  dislikedIds = signal<Set<string>>(new Set());
   search = signal('');
   isLoading = signal(true);
   isSearching = signal(false);
@@ -93,14 +98,25 @@ export class MoviesPage implements OnInit {
       this.isLoading.set(false);
     }
 
-    try {
-      const favs = await this.favorites.list();
-      this.favoriteIds.set(
-        new Set(favs.map((f) => f.id.replace(`${f.userId}_`, ''))),
-      );
-    } catch (error) {
-      console.error('Erreur favoris :', error);
+    const [favoritesResult, dislikesResult] = await Promise.allSettled([
+      this.favorites.list(),
+      this.dislikes.list(),
+    ]);
+    if (favoritesResult.status === 'fulfilled') {
+      this.favoriteIds.set(this.toIdSet(favoritesResult.value));
+    } else {
+      console.error('Erreur favoris :', favoritesResult.reason);
     }
+    if (dislikesResult.status === 'fulfilled') {
+      this.dislikedIds.set(this.toIdSet(dislikesResult.value));
+    } else {
+      console.error('Erreur preferences de recommandation :', dislikesResult.reason);
+    }
+  }
+
+  /** Les documents stockent l'identifiant du film, parfois prefixe du uid. */
+  private toIdSet(marks: Array<{ id: string; userId?: string }>): Set<string> {
+    return new Set(marks.map((mark) => mark.id.replace(`${mark.userId}_`, '')));
   }
 
   async searchMovies(): Promise<void> {
@@ -163,15 +179,36 @@ export class MoviesPage implements OnInit {
     try {
       const id = String(movie.id);
       if (this.favoriteIds().has(id)) {
-        await this.favorites.remove(id);
+        await this.reactions.removeFavorite(id);
         this.favoriteIds.update((s) => { const n = new Set(s); n.delete(id); return n; });
       } else {
-        await this.favorites.add(movie);
+        await this.reactions.addFavorite(movie);
         this.favoriteIds.update((s) => new Set(s).add(id));
+        this.dislikedIds.update((s) => { const n = new Set(s); n.delete(id); return n; });
       }
     } catch (error) {
       console.error('Erreur favori :', error);
       this.errorMessage.set(this.i18n.t('errors.favoriteToggle'));
+    }
+  }
+
+  async toggleDislike(movie: MovieModel): Promise<void> {
+    this.errorMessage.set('');
+    try {
+      const id = String(movie.id);
+      if (this.dislikedIds().has(id)) {
+        await this.reactions.removeDislike(id);
+        this.dislikedIds.update((s) => { const n = new Set(s); n.delete(id); return n; });
+      } else {
+        await this.reactions.addDislike(movie);
+        this.dislikedIds.update((s) => new Set(s).add(id));
+        // Un film exclu ne peut pas rester dans les favoris : le retrait est
+        // fait par MovieReactions, on synchronise ici l'etat de la page.
+        this.favoriteIds.update((s) => { const n = new Set(s); n.delete(id); return n; });
+      }
+    } catch (error) {
+      console.error('Erreur preference de recommandation :', error);
+      this.errorMessage.set(this.i18n.t('errors.dislikeToggle'));
     }
   }
 }

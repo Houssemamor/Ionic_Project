@@ -26,6 +26,22 @@
           {{ rating() }}
         </span>
       }
+
+      <!-- Refus de recommandation en mode grille : un bouton separe de
+           l'affiche, avec arret de la propagation pour ne pas declencher
+           l'appui long de la carte. -->
+      @if (showDislike() && view() === 'grid') {
+        <button
+          type="button"
+          class="dislike-toggle"
+          [class.active]="isDisliked()"
+          [attr.aria-label]="dislikeLabel()"
+          [title]="dislikeLabel()"
+          (pointerdown)="$event.stopPropagation()"
+          (click)="dislikeToggled.emit(movie())">
+          <ion-icon [name]="dislikeIcon()" aria-hidden="true"></ion-icon>
+        </button>
+      }
     </div>
 
     <div class="card-text">
@@ -76,6 +92,17 @@
         (click)="actionToggled.emit(movie())">
         <ion-icon [name]="actionIcon()"></ion-icon>
       </button>
+      @if (showDislike()) {
+        <button
+          type="button"
+          class="icon-button dislike-toggle"
+          [class.active]="isDisliked()"
+          [attr.aria-label]="dislikeLabel()"
+          [title]="dislikeLabel()"
+          (click)="dislikeToggled.emit(movie())">
+          <ion-icon [name]="dislikeIcon()"></ion-icon>
+        </button>
+      }
     }
   </div>
 </ion-card>

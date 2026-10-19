@@ -121,6 +121,56 @@ describe('MovieCard', () => {
     expect(component.actionIcon()).toBe('trash-outline');
   });
 
+  it('masque le controle ne pas recommander par defaut', () => {
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('.dislike-toggle')).toBeNull();
+  });
+
+  it('emet un dislike depuis le bouton superpose en mode grille', () => {
+    const emitted: Movie[] = [];
+    component.dislikeToggled.subscribe((value) => emitted.push(value));
+    fixture.componentRef.setInput('showDislike', true);
+    fixture.detectChanges();
+
+    const button = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      '.poster-wrapper .dislike-toggle',
+    );
+    expect(button?.getAttribute('aria-label')).toBe('Ne pas recommander');
+    button?.click();
+
+    expect(emitted).toEqual([movie]);
+  });
+
+  it('change le libelle quand le film est deja exclu des recommandations', () => {
+    fixture.componentRef.setInput('showDislike', true);
+    fixture.componentRef.setInput('isDisliked', true);
+    fixture.detectChanges();
+
+    const button = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      '.poster-wrapper .dislike-toggle',
+    );
+    expect(button?.getAttribute('aria-label')).toBe('Recommander à nouveau');
+    expect(button?.classList.contains('active')).toBe(true);
+  });
+
+  it('ajoute le dislike comme troisieme icone en mode liste', () => {
+    const emitted: Movie[] = [];
+    component.dislikeToggled.subscribe((value) => emitted.push(value));
+    fixture.componentRef.setInput('view', 'list');
+    fixture.componentRef.setInput('showDislike', true);
+    fixture.detectChanges();
+
+    const buttons = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
+      '.card-actions .icon-button',
+    );
+    expect(buttons.length).toBe(3);
+    expect(buttons[2].getAttribute('aria-label')).toBe('Ne pas recommander');
+    buttons[2].click();
+
+    expect(emitted).toEqual([movie]);
+  });
+
   it('n alerte pas sur une icone manquante', async () => {
     // Sans addIcons, ion-icon tente un chargement d'asset et journalise
     // un "[Ionicons Warning]". Ce test echoue si l'enregistrement disparait.

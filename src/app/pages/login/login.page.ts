@@ -4,18 +4,16 @@ import { Router, RouterLink } from '@angular/router';
 import {
   IonButton,
   IonContent,
-  IonHeader,
   IonInput,
   IonItem,
   IonLabel,
   IonSpinner,
   IonText,
-  IonTitle,
-  IonToolbar,
 } from '@ionic/angular';
 import { Auth } from '../../services/auth';
 import { TranslationService } from '../../i18n/translation.service';
 import { TranslatePipe } from '../../i18n/translate.pipe';
+import { LoginHeroComponent } from './login-hero/login-hero';
 
 @Component({
   selector: 'app-login',
@@ -24,17 +22,15 @@ import { TranslatePipe } from '../../i18n/translate.pipe';
   imports: [
     IonButton,
     IonContent,
-    IonHeader,
     IonInput,
     IonItem,
     IonLabel,
     IonSpinner,
     IonText,
-    IonTitle,
-    IonToolbar,
     FormsModule,
     RouterLink,
     TranslatePipe,
+    LoginHeroComponent,
   ],
 })
 export class LoginPage {

@@ -17,11 +17,26 @@
     <ion-text color="danger"><p>{{ errorMessage() }}</p></ion-text>
   } @else if (profile(); as user) {
     <section class="identity">
-      @if (user.photoUrl) {
-        <img class="avatar" [src]="user.photoUrl" alt="" />
-      } @else {
-        <span class="avatar avatar-initials" aria-hidden="true">{{ initials() }}</span>
-      }
+      <div class="avatar-wrapper" [attr.aria-busy]="isUpdatingPhoto()">
+        @if (user.photoUrl) {
+          <img class="avatar" [src]="user.photoUrl" alt="" />
+        } @else {
+          <span class="avatar avatar-initials" aria-hidden="true">{{ initials() }}</span>
+        }
+        <button
+          type="button"
+          class="photo-button"
+          [disabled]="isUpdatingPhoto()"
+          [attr.aria-label]="'profile.changePhoto' | translate"
+          [title]="'profile.changePhoto' | translate"
+          (click)="changePhoto()">
+          @if (isUpdatingPhoto()) {
+            <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
+          } @else {
+            <ion-icon name="camera" aria-hidden="true"></ion-icon>
+          }
+        </button>
+      </div>
       <div class="identity-text">
         <h1>{{ user.firstName }} {{ user.lastName }}</h1>
         <p class="email">{{ user.email }}</p>
@@ -35,6 +50,12 @@
         </div>
       </div>
     </section>
+
+    @if (photoErrorMessage()) {
+      <ion-text color="danger">
+        <p class="photo-error">{{ photoErrorMessage() }}</p>
+      </ion-text>
+    }
 
     <ion-card>
       <ion-card-content>
