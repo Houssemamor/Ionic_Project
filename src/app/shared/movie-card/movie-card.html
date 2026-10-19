@@ -12,7 +12,7 @@
     <div class="poster-wrapper">
       <ion-button type="button" class="poster-button" fill="clear" (click)="openDetails()">
         @if (movie().posterPath) {
-          <ion-img class="poster" [src]="movie().posterPath" [alt]="movie().title"></ion-img>
+          <img loading="lazy" class="poster" [src]="movie().posterPath" [alt]="movie().title">
         } @else {
           <span class="poster placeholder" aria-hidden="true"></span>
         }

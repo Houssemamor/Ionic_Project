@@ -19,7 +19,7 @@
     <section class="identity">
       <div class="avatar-wrapper" [attr.aria-busy]="isUpdatingPhoto()">
         @if (user.photoUrl) {
-          <ion-img class="avatar" [src]="user.photoUrl" alt=""></ion-img>
+          <img loading="lazy" class="avatar" [src]="user.photoUrl" alt="">
         } @else {
           <span class="avatar avatar-initials" aria-hidden="true">{{ initials() }}</span>
         }

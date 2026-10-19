@@ -16,7 +16,7 @@
     <!-- Identite cliquable : le bloc entier mene au profil. -->
     <a class="identity" routerLink="/profile">
       @if (user.photoUrl) {
-        <ion-img class="avatar" [src]="user.photoUrl" alt=""></ion-img>
+        <img loading="lazy" class="avatar" [src]="user.photoUrl" alt="">
       } @else {
         <span class="avatar avatar-initials" aria-hidden="true">{{ initials() }}</span>
       }
@@ -41,7 +41,7 @@
           @for (movie of recommendations(); track movie.id) {
             <a class="recommendation" [routerLink]="['/movie-details', movie.id]">
               @if (movie.posterPath) {
-                <ion-img class="recommendation-poster" [src]="movie.posterPath" [alt]="movie.title"></ion-img>
+                <img loading="lazy" class="recommendation-poster" [src]="movie.posterPath" [alt]="movie.title">
               } @else {
                 <span class="recommendation-poster placeholder" aria-hidden="true"></span>
               }

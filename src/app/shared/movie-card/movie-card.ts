@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, computed, inject, input, output } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonButton, IonCard, IonIcon } from '@ionic/angular';
 import { addIcons } from 'ionicons';
@@ -26,7 +26,6 @@ const LONG_PRESS_MS = 500;
   selector: 'app-movie-card',
   templateUrl: './movie-card.html',
   styleUrls: ['./movie-card.scss'],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   imports: [IonButton, IonCard, IonIcon, TranslatePipe],
 })
 export class MovieCardComponent {

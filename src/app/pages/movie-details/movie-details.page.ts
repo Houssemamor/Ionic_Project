@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Favorite } from '../../services/favorite';
 import { Dislike } from '../../services/dislike';
@@ -18,7 +18,6 @@ import {
   selector: 'app-movie-details',
   templateUrl: './movie-details.page.html',
   styleUrls: ['./movie-details.page.scss'],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   imports: [
     IonBackButton, IonButtons, IonButton, IonCard, IonCardContent, IonCardTitle, IonContent,
     IonHeader, IonSpinner, IonText, IonTitle, IonToolbar, TranslatePipe,

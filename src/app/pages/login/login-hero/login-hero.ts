@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { IonButton, IonIcon } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { pause, play, star } from 'ionicons/icons';
@@ -23,7 +23,6 @@ const SLIDE_LIMIT = 5;
   selector: 'app-login-hero',
   templateUrl: './login-hero.html',
   styleUrls: ['./login-hero.scss'],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   imports: [IonButton, IonIcon, TranslatePipe],
 })
 export class LoginHeroComponent implements OnInit {

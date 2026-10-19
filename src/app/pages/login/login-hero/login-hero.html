@@ -14,7 +14,7 @@
         [class.active]="i === activeIndex()"
         [attr.aria-hidden]="i !== activeIndex()">
         @if (movie.backdropPath || movie.posterPath) {
-          <ion-img [src]="movie.backdropPath ?? movie.posterPath" alt=""></ion-img>
+          <img loading="lazy" [src]="movie.backdropPath ?? movie.posterPath" alt="">
         }
       </div>
     }
