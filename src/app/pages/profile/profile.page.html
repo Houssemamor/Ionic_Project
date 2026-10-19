@@ -32,6 +32,22 @@
       </ion-card-content>
     </ion-card>
 
+    <!-- Preference d'affichage : s'applique aux titres, synopsis et genres
+         demandes a TMDB, sans toucher aux libelles de l'interface. -->
+    <ion-card>
+      <ion-card-content>
+        <ion-item lines="none">
+          <ion-select
+            label="Langue des films"
+            [value]="language()"
+            (ionChange)="changeLanguage($event.detail.value)">
+            <ion-select-option value="fr">Français</ion-select-option>
+            <ion-select-option value="en">English</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
     <ion-button expand="block" color="danger" (click)="logout()" [disabled]="isLoggingOut()">
       Se déconnecter
     </ion-button>

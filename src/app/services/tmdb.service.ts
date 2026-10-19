@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Movie } from '../models/movie.model';
+import { MovieLanguage, readMovieLanguage } from './language-preference';
 
 interface TmdbMovie {
   id: number;
@@ -26,10 +27,10 @@ interface TmdbGenreListResponse {
 export class TmdbService {
   private readonly http = inject(HttpClient);
 
-  // Correspondance genre_id -> nom, recuperee une seule fois puis mise en cache.
-  // Les appels de liste ne renvoient que des identifiants de genre : sans cette
-  // table, le filtre par genre n'a aucun nom a afficher.
-  private genreNames: Map<number, string> | null = null;
+  // Correspondance genre_id -> nom, mise en cache par langue : les appels de
+  // liste ne renvoient que des identifiants, et changer la langue doit aussi
+  // changer les noms affiches par le filtre.
+  private readonly genreNames = new Map<MovieLanguage, Map<number, string>>();
 
   async popular(page = 1): Promise<Movie[]> {
     return this.request('/movie/popular', { page });
@@ -53,48 +54,58 @@ export class TmdbService {
       throw new Error('La clé API MovieDB doit être renseignée dans src/environments/environment.ts.');
     }
 
+    // La langue est lue a chaque appel : le profil peut la changer sans que le
+    // service soit recree, puisqu'il est fourni a la racine de l'application.
+    const language = readMovieLanguage();
     const response = await firstValueFrom(
       this.http.get<TmdbListResponse | TmdbMovie>(`${environment.tmdb.baseUrl}${path}`, {
-        params: this.apiParams(parameters),
+        params: this.apiParams(language, parameters),
       }),
     );
-    const genreNames = await this.loadGenreNames();
+    const genreNames = await this.loadGenreNames(language);
     const results = 'results' in response ? response.results : [response];
     return results.map((movie) => this.toMovie(movie, genreNames));
   }
 
   /**
-   * Charge la liste des genres TMDB en francais au premier appel seulement.
+   * Charge la liste des genres TMDB dans la langue demandee au premier appel.
    * Un echec n'est pas bloquant : le film reste affichable, seul le filtre
-   * par genre ne disposera d'aucun nom.
+   * par genre ne disposera d'aucun nom. Un echec n'est pas mis en cache, pour
+   * qu'un appel ulterieur puisse reessayer.
    */
-  private async loadGenreNames(): Promise<Map<number, string>> {
-    this.genreNames ??= new Map<number, string>();
-    if (this.genreNames.size > 0) {
-      return this.genreNames;
+  private async loadGenreNames(language: MovieLanguage): Promise<Map<number, string>> {
+    const cached = this.genreNames.get(language);
+    if (cached) {
+      return cached;
     }
 
+    const names = new Map<number, string>();
     try {
       const response = await firstValueFrom(
         this.http.get<TmdbGenreListResponse>(`${environment.tmdb.baseUrl}/genre/movie/list`, {
-          params: this.apiParams(),
+          params: this.apiParams(language),
         }),
       );
       for (const genre of response.genres) {
-        this.genreNames.set(genre.id, genre.name);
+        names.set(genre.id, genre.name);
       }
+      this.genreNames.set(language, names);
     } catch (error) {
       console.error('Liste des genres MovieDB indisponible :', error);
     }
-    return this.genreNames;
+    return names;
   }
 
   /** Construit les parametres communs a tous les appels TMDB. */
-  private apiParams(parameters: Record<string, string | number | boolean> = {}): HttpParams {
+  private apiParams(
+    language: MovieLanguage,
+    parameters: Record<string, string | number | boolean> = {},
+  ): HttpParams {
     return new HttpParams({
       fromObject: {
         api_key: environment.tmdb.apiKey,
-        language: 'fr-FR',
+        // TMDB attend une locale complete, pas le code court utilise par la preference.
+        language: language === 'en' ? 'en-US' : 'fr-FR',
         ...Object.fromEntries(Object.entries(parameters).map(([key, value]) => [key, String(value)])),
       },
     });

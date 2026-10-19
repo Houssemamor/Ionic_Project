@@ -8,6 +8,7 @@ describe('ProfilePage', () => {
   let fixture: ComponentFixture<ProfilePage>;
 
   beforeEach(() => {
+    localStorage.clear();
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
@@ -35,6 +36,15 @@ describe('ProfilePage', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('memorise la langue des films choisie dans le profil', () => {
+    expect(component.language()).toBe('fr');
+
+    component.changeLanguage('en');
+
+    expect(component.language()).toBe('en');
+    expect(localStorage.getItem('movieDataLanguage')).toBe('en');
   });
 
   it('loads the authenticated user profile after auth state restoration', async () => {

@@ -10,6 +10,8 @@ import {
   IonHeader,
   IonItem,
   IonLabel,
+  IonSelect,
+  IonSelectOption,
   IonSpinner,
   IonText,
   IonTitle,
@@ -17,6 +19,9 @@ import {
 } from '@ionic/angular';
 import { Auth } from '../../services/auth';
 import { UserProfile } from '../../models/user.model';
+import {
+  MovieLanguage, readMovieLanguage, writeMovieLanguage,
+} from '../../services/language-preference';
 
 const PROFILE_LOAD_TIMEOUT_MS = 12000;
 
@@ -26,7 +31,7 @@ const PROFILE_LOAD_TIMEOUT_MS = 12000;
   styleUrls: ['./profile.page.scss'],
   imports: [
     IonBackButton, IonButton, IonButtons, IonCard, IonCardContent, IonContent, IonHeader,
-    IonItem, IonLabel, IonSpinner, IonText, IonTitle, IonToolbar,
+    IonItem, IonLabel, IonSelect, IonSelectOption, IonSpinner, IonText, IonTitle, IonToolbar,
     RouterLink,
   ],
 })
@@ -35,6 +40,9 @@ export class ProfilePage implements OnInit {
   isLoading = signal(true);
   isLoggingOut = signal(false);
   errorMessage = signal('');
+  // Preference locale, independante du profil Firestore : elle reste sur
+  // l'appareil comme le mode d'affichage grille/liste.
+  language = signal<MovieLanguage>(readMovieLanguage());
 
   constructor(
     private readonly auth: Auth,
@@ -72,8 +80,14 @@ export class ProfilePage implements OnInit {
     return this.auth.getCurrentProfile(user);
   }
 
-  async logout(): Promise<void> {
-    this.isLoggingOut.set(true);
+  /** Enregistre la langue des metadonnees TMDB choisie dans le profil. */
+  changeLanguage(value: string | undefined): void {
+    const language: MovieLanguage = value === 'en' ? 'en' : 'fr';
+    writeMovieLanguage(language);
+    this.language.set(language);
+  }
+
+  async logout(): Promise<void> {    this.isLoggingOut.set(true);
     try {
       await this.auth.logout();
       await this.router.navigateByUrl('/login', { replaceUrl: true });
