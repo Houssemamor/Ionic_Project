@@ -1,63 +1,55 @@
 # Ionic Project
 
-Application mobile Ionic/Angular de gestion de films. Le projet utilise Firebase
-pour l'authentification et le stockage des profils utilisateurs.
+Application mobile Ionic/Angular de découverte et de gestion de films. Les
+utilisateurs peuvent créer un compte, rechercher des films, constituer une
+playlist et trouver des profils ayant des goûts similaires. Les
+administrateurs disposent d'un espace dédié pour gérer les utilisateurs et les
+films enregistrés dans Firestore.
 
-## État actuel du projet
+## Fonctionnalités
 
-### Fonctionnalités implémentées
+### Utilisateur
 
-- **Création de compte** depuis `/register` avec les champs prénom, nom, âge,
-  photo prise avec la caméra, e-mail, mot de passe et confirmation du mot de passe.
-- **Validation de l'inscription** :
+- Inscription avec prénom, nom, âge, e-mail, mot de passe et photo de profil.
+- Validation des données d'inscription :
   - tous les champs sont obligatoires ;
   - l'âge doit être compris entre 13 et 120 ans ;
   - le mot de passe doit contenir au moins 6 caractères ;
-  - les deux mots de passe doivent être identiques.
-- **Connexion** depuis `/login` avec e-mail et mot de passe.
-- **Déconnexion** depuis l'accueil ou le profil.
-- **Photo de profil** : capture via Capacitor Camera, envoi vers Firebase Storage
-  et sauvegarde de l'URL dans le profil Firestore.
-- **Gestion des profils dans Firestore** : la création d'un compte crée un
-  document dans la collection `users`, avec le rôle `user`, le statut actif et
-  la date de création.
-- **Page d'accueil protégée** (`/home`) accessible uniquement après connexion.
-- **Page profil** (`/profile`) affichant le prénom, le nom, l'e-mail, l'âge, le
-  rôle et le statut du compte.
-- **Blocage des comptes désactivés** : un compte dont le champ `active` vaut
-  `false` est déconnecté lors de la connexion.
-- **Messages d'erreur utilisateur** pour les erreurs courantes Firebase
-  (identifiants invalides, e-mail déjà utilisé, e-mail invalide, trop de
-  tentatives, mot de passe faible).
-- **Protection contre les attentes infinies** lors du chargement de l'état
-  d'authentification et du profil, avec des délais d'expiration explicites.
-- **Films MovieDB** : liste populaire, recherche et détails via l'API TMDB.
-- **Playlist personnelle** : ajout et suppression de films favoris dans
-  `favorites`, avec séparation par utilisateur.
-- **Matching** : affichage des utilisateurs actifs dont le taux de films en
-  commun est strictement supérieur à 75 % (formule de Jaccard).
+  - la confirmation doit correspondre au mot de passe.
+- Connexion et déconnexion avec Firebase Authentication.
+- Profil utilisateur avec affichage des informations personnelles, du rôle et
+  du statut du compte.
+- Capture et stockage de la photo de profil avec Capacitor Camera et Firebase
+  Storage.
+- Consultation des films populaires et recherche avec l'API TMDB.
+- Consultation des détails d'un film.
+- Ajout et suppression de films dans une playlist personnelle.
+- Matching avec les utilisateurs actifs ayant plus de 75 % de films en commun
+  selon l'indice de Jaccard.
+- Blocage automatique des comptes désactivés.
 
-### Écrans présents mais pas encore fonctionnels
+### Administration
 
-Les routes suivantes existent et sont protégées par l'authentification, mais
-leur interface est encore une page Ionic de base sans logique métier :
+- Accès protégé par authentification et vérification du rôle `admin`.
+- Consultation, recherche et filtrage des utilisateurs par statut.
+- Activation et désactivation des comptes utilisateurs.
+- Ajout de films dans la collection Firestore `movies`.
+- Suppression de films après confirmation.
+- Tableau de bord administrateur présent comme point d'entrée pour les
+  évolutions futures.
 
-- `/admin/dashboard` : tableau de bord administrateur ;
-
-Les routes utilisateur vérifient qu'un profil actif est présent et les routes
-administrateur exigent un profil actif dont le rôle vaut `admin`.
-
-## Technologies utilisées
+## Technologies
 
 - [Ionic](https://ionicframework.com/) 9
 - Angular 22 avec composants standalone
 - Capacitor 8
 - Firebase 12 :
-  - Firebase Authentication (e-mail / mot de passe) ;
+  - Authentication (e-mail / mot de passe) ;
   - Cloud Firestore (profils, films et playlists) ;
-  - Firebase Storage (photos de profil).
-- un compte TMDB et une clé API.
+  - Storage (photos de profil).
+- API [TMDB](https://www.themoviedb.org/)
 - TypeScript 6
+- Docker et Nginx pour l'environnement de production
 
 ## Prérequis
 
@@ -65,16 +57,19 @@ administrateur exigent un profil actif dont le rôle vaut `admin`.
 - un projet Firebase configuré avec :
   - le fournisseur **E-mail/Mot de passe** activé dans Authentication ;
   - Cloud Firestore activé ;
-  - Storage activé si la gestion des photos est ajoutée.
+  - Firebase Storage activé ;
+- une clé API TMDB.
 
-La configuration Firebase est définie dans :
+Les paramètres Firebase et TMDB sont définis dans :
 
 - `src/environments/environment.ts` pour le développement ;
 - `src/environments/environment.prod.ts` pour la production.
-- renseigner `tmdb.apiKey` dans ces deux fichiers d'environnement.
 
-Les règles Firestore versionnées se trouvent dans `firestore.rules`. Après
-configuration du projet Firebase, elles peuvent être déployées avec :
+Avant de lancer l'application, renseigner la clé `tmdb.apiKey` et les
+paramètres du projet Firebase dans ces deux fichiers.
+
+Les règles Firestore sont versionnées dans `firestore.rules`. Elles peuvent
+être déployées avec :
 
 ```bash
 npx firebase-tools deploy --only firestore:rules
@@ -86,24 +81,53 @@ Les règles Storage peuvent être déployées avec :
 npx firebase-tools deploy --only storage
 ```
 
-Pour tester la caméra sur Android/iOS, ajouter la plateforme native puis
-synchroniser Capacitor :
-
-```bash
-npx cap add android
-npx cap sync
-```
-
 ## Installation
 
 ```bash
 npm install
 ```
 
-## Travailler avec Docker
+## Création du compte administrateur
 
-Docker permet à chaque membre de l'équipe d'utiliser la même version de
-Node.js et les mêmes dépendances, sans installer l'environnement localement.
+Le script `seed:admin` crée le compte Firebase Authentication et le profil
+administrateur correspondant dans Firestore.
+
+1. Placer la clé de compte de service Firebase dans
+   `scripts/serviceAccountKey.json`.
+2. Créer un fichier `.env` à la racine du projet :
+
+```dotenv
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=mot-de-passe-securise
+```
+
+3. Exécuter le script :
+
+```bash
+npm run seed:admin
+```
+
+Les fichiers `.env` et `scripts/serviceAccountKey.json` sont ignorés par Git et
+ne doivent jamais être publiés.
+
+## Lancer l'application
+
+```bash
+npm start
+```
+
+L'application est disponible à l'adresse `http://localhost:4200`.
+
+Pour tester la caméra sur Android ou iOS :
+
+```bash
+npx cap add android
+npx cap sync
+```
+
+## Docker
+
+Docker permet d'utiliser un environnement identique pour toute l'équipe.
 Docker Desktop doit être démarré.
 
 ### Développement avec rechargement à chaud
@@ -112,90 +136,64 @@ Docker Desktop doit être démarré.
 docker compose up app
 ```
 
-L'application est disponible sur `http://localhost:4200`. Le répertoire du
-projet est monté dans le conteneur : les modifications de code sont donc
-rechargées automatiquement. Le volume Docker `node_modules` évite d'écraser
-les dépendances Linux du conteneur avec celles éventuellement présentes sur
-Windows ou macOS.
-
-Pour arrêter l'environnement :
+L'application est disponible à l'adresse `http://localhost:4200`. Pour
+arrêter les conteneurs :
 
 ```bash
 docker compose down
 ```
 
-### Vérifier l'image de production
+### Vérification de l'image de production
 
 ```bash
 docker compose --profile production up --build production
 ```
 
-L'image compilée est disponible sur `http://localhost:8080`. Angular étant une
-application à routes côté client, Nginx redirige les routes inconnues vers
-`index.html`.
-
-Les fichiers `.env` et `scripts/serviceAccountKey.json` sont exclus des images.
-Ils ne doivent jamais être ajoutés à Git ni copiés dans un conteneur.
-
-## Lancer l'application
-
-```bash
-npm start
-```
-
-L'application est ensuite disponible à l'adresse indiquée par Angular CLI
-(généralement `http://localhost:4200`).
+L'application compilée est disponible à l'adresse `http://localhost:8080`.
+Nginx redirige les routes côté client vers `index.html`.
 
 ## Commandes disponibles
 
 | Commande | Description |
 | --- | --- |
 | `npm start` | Lance le serveur de développement |
-| `npm run build` | Compile l'application pour la production |
-| `npm run watch` | Compile en mode développement avec surveillance des fichiers |
+| `npm run build` | Compile l'application |
+| `npm run watch` | Compile en mode développement avec surveillance |
 | `npm test` | Lance les tests unitaires |
 | `npm run lint` | Vérifie le code TypeScript et les templates Angular |
+| `npm run seed:admin` | Crée ou met à jour le compte administrateur |
 
-## Organisation principale
+## Routes
+
+| Route | Accès | Fonction |
+| --- | --- | --- |
+| `/login` | Public | Connexion |
+| `/register` | Public | Inscription |
+| `/home` | Utilisateur actif | Accueil |
+| `/profile` | Utilisateur actif | Profil |
+| `/movies` | Utilisateur actif | Films populaires et recherche TMDB |
+| `/movie-details/:id` | Utilisateur actif | Détails et favoris |
+| `/favorites` | Utilisateur actif | Playlist personnelle |
+| `/matching` | Utilisateur actif | Correspondances de goûts |
+| `/admin/dashboard` | Administrateur actif | Tableau de bord |
+| `/admin/users` | Administrateur actif | Gestion des utilisateurs |
+| `/admin/movies` | Administrateur actif | Gestion des films |
+
+## Organisation du projet
 
 ```text
 src/
 └── app/
-    ├── guards/       # Protection des routes
+    ├── guards/       # Protection des routes utilisateur et administrateur
     ├── home/         # Accueil après connexion
     ├── models/       # Modèles UserProfile, Movie et Favorite
     ├── pages/        # Pages publiques, utilisateur et administration
-    └── services/     # Authentification, Firebase et futurs services métier
+    └── services/     # Authentification, Firebase, films et matching
 ```
-
-### Flux d'authentification
-
-1. L'utilisateur crée un compte ou se connecte avec Firebase Authentication.
-2. À l'inscription, son profil est enregistré dans `users/{uid}` dans Firestore.
-3. `authGuard` attend la résolution de l'état Firebase avant de laisser
-   accéder aux routes protégées.
-4. L'utilisateur est redirigé vers `/login` s'il n'est pas authentifié.
-5. Après une connexion réussie, il est redirigé vers `/home`.
-
-## Routes
-
-| Route | Accès | État |
-| --- | --- | --- |
-| `/login` | Public | Connexion fonctionnelle |
-| `/register` | Public | Inscription fonctionnelle |
-| `/home` | Authentifié | Accueil et déconnexion fonctionnels |
-| `/profile` | Authentifié | Consultation du profil fonctionnelle |
-| `/movies` | Authentifié | Films populaires et recherche MovieDB |
-| `/movie-details/:id` | Authentifié | Détails MovieDB et favoris |
-| `/favorites` | Authentifié | Playlist personnelle |
-| `/matching` | Authentifié | Correspondances supérieures à 75 % |
-| `/admin/dashboard` | Administrateur actif | Placeholder |
-| `/admin/users` | Administrateur actif | Placeholder |
-| `/admin/movies` | Administrateur actif | Placeholder |
 
 ## Modèle utilisateur
 
-Les profils stockés dans Firestore suivent la structure suivante :
+Les profils stockés dans `users/{uid}` suivent cette structure :
 
 ```ts
 {
@@ -211,9 +209,14 @@ Les profils stockés dans Firestore suivent la structure suivante :
 }
 ```
 
-## Limites connues
+## Sécurité et limites connues
 
-- La clé TMDB doit être renseignée manuellement dans les environnements.
-- La liste des profils est lisible par les utilisateurs authentifiés afin de
+- Les routes utilisateur nécessitent un profil actif.
+- Les routes administrateur nécessitent un profil actif avec le rôle `admin`.
+- Les règles Firestore autorisent l'écriture des films uniquement aux
+  administrateurs.
+- La clé TMDB doit être configurée dans les fichiers d'environnement.
+- La liste des profils est lisible par les utilisateurs authentifiés pour
   permettre le calcul du matching côté client.
-- Le dashboard administrateur reste à compléter.
+- Le tableau de bord administrateur est fonctionnel comme route protégée, mais
+  son contenu métier reste à enrichir.
