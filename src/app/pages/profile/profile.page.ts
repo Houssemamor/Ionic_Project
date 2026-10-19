@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { camera } from 'ionicons/icons';
@@ -38,6 +38,7 @@ const PROFILE_LOAD_TIMEOUT_MS = 12000;
   selector: 'app-profile',
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   imports: [
     IonBackButton, IonButton, IonButtons, IonCard, IonCardContent, IonContent, IonHeader,
     IonIcon, IonItem, IonSelect, IonSelectOption, IonSpinner, IonText, IonTitle,

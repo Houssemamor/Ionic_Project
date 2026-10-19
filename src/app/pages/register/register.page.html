@@ -43,7 +43,7 @@
       {{ (photoDataUrl ? 'register.retakePhoto' : 'register.takePhoto') | translate }}
     </ion-button>
     @if (photoDataUrl) {
-      <img class="photo-preview" [src]="photoDataUrl" [alt]="'register.photoPreviewAlt' | translate" />
+      <ion-img class="photo-preview" [src]="photoDataUrl" [alt]="'register.photoPreviewAlt' | translate"></ion-img>
     }
 
     @if (errorMessage) {

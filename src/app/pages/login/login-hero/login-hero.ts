@@ -1,5 +1,5 @@
-import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
-import { IonIcon } from '@ionic/angular';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { IonButton, IonIcon } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { pause, play, star } from 'ionicons/icons';
 import { Movie } from '../../../models/movie.model';
@@ -23,7 +23,8 @@ const SLIDE_LIMIT = 5;
   selector: 'app-login-hero',
   templateUrl: './login-hero.html',
   styleUrls: ['./login-hero.scss'],
-  imports: [IonIcon, TranslatePipe],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  imports: [IonButton, IonIcon, TranslatePipe],
 })
 export class LoginHeroComponent implements OnInit {
   private readonly tmdb = inject(TmdbService);

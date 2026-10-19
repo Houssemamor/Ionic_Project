@@ -17,6 +17,8 @@ ion-card {
   display: block;
 }
 
+// Bouton de l'affiche : un bouton Ionic sans remplissage garde l'affiche
+// cliquable sans style parasite.
 .poster-button {
   display: block;
   width: 100%;
@@ -24,6 +26,12 @@ ion-card {
   border: 0;
   background: none;
   cursor: pointer;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --background: transparent;
+  --box-shadow: none;
 }
 
 // Badge de note superpose a l'affiche. Pas de capture de clic : l'appui long
@@ -68,6 +76,13 @@ ion-card {
   background: rgb(0 0 0 / 72%);
   color: #fff;
   cursor: pointer;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --background: rgb(0 0 0 / 72%);
+  --border-radius: 50%;
+  --box-shadow: none;
 }
 
 .poster-wrapper .dislike-toggle ion-icon {
@@ -195,6 +210,12 @@ ion-card.list .card-actions {
   background: transparent;
   color: var(--ion-color-medium);
   cursor: pointer;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --background: transparent;
+  --border-radius: 50%;
 }
 
 .icon-button ion-icon {

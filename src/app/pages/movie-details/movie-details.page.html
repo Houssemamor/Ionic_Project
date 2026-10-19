@@ -20,7 +20,7 @@
 
     <ion-card>
       @if (m.posterPath) {
-        <img class="poster" [src]="m.posterPath" [alt]="m.title" />
+        <ion-img class="poster" [src]="m.posterPath" [alt]="m.title"></ion-img>
       }
       <ion-card-content>
         <ion-card-title>{{ m.title }}</ion-card-title>

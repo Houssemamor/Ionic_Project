@@ -94,7 +94,7 @@ describe('MovieCard', () => {
       '.card-actions .icon-button',
     );
     expect(buttons.length).toBe(2);
-    expect((fixture.nativeElement as HTMLElement).querySelector('.card-actions ion-button')).toBeNull();
+    expect((fixture.nativeElement as HTMLElement).querySelector('.card-actions ion-button:not(.icon-button)')).toBeNull();
     expect(buttons[0].getAttribute('aria-label')).toBe('Voir les détails');
     expect(buttons[1].getAttribute('aria-label')).toBe('♡ Favori');
   });

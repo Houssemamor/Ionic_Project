@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
@@ -25,6 +25,7 @@ addIcons({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   imports: [
     IonContent, IonHeader, IonIcon, IonSpinner, IonText, IonTitle, IonToolbar,
     RouterLink, TranslatePipe,

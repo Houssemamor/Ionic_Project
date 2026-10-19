@@ -10,13 +10,13 @@
   <div class="card-body">
     <!-- L'affiche est un vrai bouton : navigation au clic et accessible au clavier. -->
     <div class="poster-wrapper">
-      <button type="button" class="poster-button" (click)="openDetails()">
+      <ion-button type="button" class="poster-button" fill="clear" (click)="openDetails()">
         @if (movie().posterPath) {
-          <img class="poster" [src]="movie().posterPath" [alt]="movie().title" />
+          <ion-img class="poster" [src]="movie().posterPath" [alt]="movie().title"></ion-img>
         } @else {
           <span class="poster placeholder" aria-hidden="true"></span>
         }
-      </button>
+      </ion-button>
 
       <!-- Badge de note en mode grille, superpose a l'affiche. role="img" donne
            un nom accessible fiable au badge, qui n'est pas un element de formulaire. -->
@@ -31,16 +31,18 @@
            l'affiche, avec arret de la propagation pour ne pas declencher
            l'appui long de la carte. -->
       @if (showDislike() && view() === 'grid') {
-        <button
+        <ion-button
           type="button"
           class="dislike-toggle"
+          fill="clear"
+          size="small"
           [class.active]="isDisliked()"
           [attr.aria-label]="dislikeLabel()"
           [title]="dislikeLabel()"
           (pointerdown)="$event.stopPropagation()"
           (click)="dislikeToggled.emit(movie())">
           <ion-icon [name]="dislikeIcon()" aria-hidden="true"></ion-icon>
-        </button>
+        </ion-button>
       }
     </div>
 
@@ -83,25 +85,29 @@
         (click)="openDetails()">
         <ion-icon name="information-circle-outline"></ion-icon>
       </button>
-      <button
+      <ion-button
         type="button"
         class="icon-button"
+        fill="clear"
+        size="small"
         [class.filled]="favoriteAction() !== 'remove' && isFavorite()"
         [attr.aria-label]="actionLabel()"
         [title]="actionLabel()"
         (click)="actionToggled.emit(movie())">
         <ion-icon [name]="actionIcon()"></ion-icon>
-      </button>
+      </ion-button>
       @if (showDislike()) {
-        <button
+        <ion-button
           type="button"
           class="icon-button dislike-toggle"
+          fill="clear"
+          size="small"
           [class.active]="isDisliked()"
           [attr.aria-label]="dislikeLabel()"
           [title]="dislikeLabel()"
           (click)="dislikeToggled.emit(movie())">
           <ion-icon [name]="dislikeIcon()"></ion-icon>
-        </button>
+        </ion-button>
       }
     }
   </div>

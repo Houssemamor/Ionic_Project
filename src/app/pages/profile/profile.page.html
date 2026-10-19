@@ -19,13 +19,15 @@
     <section class="identity">
       <div class="avatar-wrapper" [attr.aria-busy]="isUpdatingPhoto()">
         @if (user.photoUrl) {
-          <img class="avatar" [src]="user.photoUrl" alt="" />
+          <ion-img class="avatar" [src]="user.photoUrl" alt=""></ion-img>
         } @else {
           <span class="avatar avatar-initials" aria-hidden="true">{{ initials() }}</span>
         }
-        <button
+        <ion-button
           type="button"
           class="photo-button"
+          fill="clear"
+          size="small"
           [disabled]="isUpdatingPhoto()"
           [attr.aria-label]="'profile.changePhoto' | translate"
           [title]="'profile.changePhoto' | translate"
@@ -35,7 +37,7 @@
           } @else {
             <ion-icon name="camera" aria-hidden="true"></ion-icon>
           }
-        </button>
+        </ion-button>
       </div>
       <div class="identity-text">
         <h1>{{ user.firstName }} {{ user.lastName }}</h1>

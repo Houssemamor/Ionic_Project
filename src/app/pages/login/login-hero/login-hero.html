@@ -14,7 +14,7 @@
         [class.active]="i === activeIndex()"
         [attr.aria-hidden]="i !== activeIndex()">
         @if (movie.backdropPath || movie.posterPath) {
-          <img [src]="movie.backdropPath ?? movie.posterPath" alt="" />
+          <ion-img [src]="movie.backdropPath ?? movie.posterPath" alt=""></ion-img>
         }
       </div>
     }
@@ -28,14 +28,16 @@
   </div>
 
   @if (canAutoPlay()) {
-    <button
+    <ion-button
       type="button"
       class="hero-pause"
+      fill="clear"
+      size="small"
       [attr.aria-label]="(isPaused() ? 'login.heroPlay' : 'login.heroPause') | translate"
       [title]="(isPaused() ? 'login.heroPlay' : 'login.heroPause') | translate"
       (click)="togglePause()">
       <ion-icon [name]="isPaused() ? 'play' : 'pause'" aria-hidden="true"></ion-icon>
-    </button>
+    </ion-button>
   }
 
   @if (activeMovie(); as movie) {
@@ -65,14 +67,16 @@
   @if (slides().length > 1) {
     <div class="hero-dots">
       @for (movie of slides(); track movie.id; let i = $index) {
-        <button
+        <ion-button
           type="button"
           class="hero-dot"
+          fill="clear"
+          size="small"
           [class.active]="i === activeIndex()"
           [attr.aria-label]="'login.heroSlide' | translate: { index: i + 1, total: slides().length }"
           [attr.aria-current]="i === activeIndex() ? 'true' : null"
           (click)="selectSlide(i)">
-        </button>
+        </ion-button>
       }
     </div>
   }

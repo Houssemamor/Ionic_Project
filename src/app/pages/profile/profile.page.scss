@@ -53,6 +53,13 @@
   color: var(--ion-color-primary);
   cursor: pointer;
   box-shadow: 0 2px 8px rgb(0 0 0 / 25%);
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --background: var(--ion-background-color);
+  --border-radius: 50%;
+  --box-shadow: none;
 }
 
 .photo-button:disabled {
