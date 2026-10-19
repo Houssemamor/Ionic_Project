@@ -77,14 +77,16 @@
     } @else {
       <!-- Mode liste : boutons icones empiles, chaque icone porte son libelle
            pour les lecteurs d'ecran et son infobulle au survol. -->
-      <button
+      <ion-button
         type="button"
         class="icon-button"
+        fill="clear"
+        size="small"
         [attr.aria-label]="'card.detailsAria' | translate"
         [title]="'card.detailsAria' | translate"
         (click)="openDetails()">
         <ion-icon name="information-circle-outline"></ion-icon>
-      </button>
+      </ion-button>
       <ion-button
         type="button"
         class="icon-button"
