@@ -5,6 +5,7 @@ import { Movie } from '../../models/movie.model';
 import { TmdbService } from '../../services/tmdb.service';
 import { Movie as FirestoreMovie } from '../../services/movie';
 import {
+  IonBackButton, IonButtons,
   IonButton, IonCard, IonCardContent, IonCardTitle, IonContent,
   IonHeader, IonSpinner, IonText, IonTitle, IonToolbar,
 } from '@ionic/angular';
@@ -14,7 +15,7 @@ import {
   templateUrl: './movie-details.page.html',
   styleUrls: ['./movie-details.page.scss'],
   imports: [
-    IonButton, IonCard, IonCardContent, IonCardTitle, IonContent,
+    IonBackButton, IonButtons, IonButton, IonCard, IonCardContent, IonCardTitle, IonContent,
     IonHeader, IonSpinner, IonText, IonTitle, IonToolbar,
   ],
 })

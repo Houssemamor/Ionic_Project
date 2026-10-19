@@ -1,5 +1,8 @@
 <ion-header>
   <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/movies"></ion-back-button>
+    </ion-buttons>
     <ion-title>Détails du film</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -17,7 +20,7 @@
 
     <ion-card>
       @if (m.posterPath) {
-        <img class="poster" [src]="tmdb.imageUrl(m.posterPath)" [alt]="m.title" />
+        <img class="poster" [src]="m.posterPath" [alt]="m.title" />
       }
       <ion-card-content>
         <ion-card-title>{{ m.title }}</ion-card-title>

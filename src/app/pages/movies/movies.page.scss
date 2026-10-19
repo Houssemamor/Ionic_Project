@@ -1,16 +1,34 @@
+// Le style des cartes (affiche, titre, genres, actions) appartient au composant
+// app-movie-card ; ces fichiers ne portent que la mise en page des conteneurs.
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
 .movie-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 12px;
 }
 
-ion-card {
-  margin: 0;
+.movie-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-ion-card img {
-  width: 100%;
-  aspect-ratio: 2 / 3;
-  object-fit: cover;
-  display: block;
+// Texte invisible reserve aux lecteurs d'ecran, utilise pour nommer le bouton
+// flottant qui ne contient qu'une icone.
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }

@@ -1,0 +1,172 @@
+:host {
+  display: block;
+}
+
+ion-card {
+  margin: 0;
+}
+
+// Mode grille : affiche au-dessus, texte centre, actions en bas.
+.card-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.poster-wrapper {
+  position: relative;
+  display: block;
+}
+
+.poster-button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+// Badge de note superpose a l'affiche. Pas de capture de clic : l'appui long
+// et la navigation de l'affiche doivent continuer a fonctionner dessous.
+.rating-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.rating-badge ion-icon,
+.rating ion-icon {
+  font-size: 14px;
+  color: var(--ion-color-warning);
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+}
+
+.poster {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+}
+
+.poster.placeholder {
+  background: var(--ion-color-light, #eee);
+}
+
+.card-text {
+  padding: 8px 16px 0;
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.year {
+  color: var(--ion-color-medium);
+  font-weight: 400;
+}
+
+.genres {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  padding: 8px 16px 16px;
+}
+
+// Mode liste : une seule rangee, affiche a gauche, texte au centre,
+// actions alignees a droite, comme sur les listes compactes d'IMDB.
+ion-card.list {
+  display: flex;
+  align-items: stretch;
+}
+
+ion-card.list .card-body {
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  min-width: 0;
+}
+
+// L'affiche occupe une colonne fixe ; c'est le conteneur qui porte la taille
+// dans la rangee flex, pas le bouton lui-meme.
+ion-card.list .poster-wrapper {
+  flex: 0 0 64px;
+  width: 64px;
+  align-self: stretch;
+}
+
+ion-card.list .poster-button {
+  height: 100%;
+}
+
+ion-card.list .poster {
+  aspect-ratio: auto;
+  height: 100%;
+  min-height: 64px;
+}
+
+ion-card.list .card-text {
+  flex: 1;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+ion-card.list .card-actions {
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px;
+}
+
+// Boutons icones du mode liste : carres compacts, empiles verticalement.
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--ion-color-medium);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ion-color-medium);
+  cursor: pointer;
+}
+
+.icon-button ion-icon {
+  font-size: 20px;
+}
+
+.icon-button.filled {
+  border-color: var(--ion-color-danger);
+  color: var(--ion-color-danger);
+}

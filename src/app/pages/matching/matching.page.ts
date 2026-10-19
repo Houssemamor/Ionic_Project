@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
-  IonAvatar, IonButton, IonCard, IonCardContent, IonContent, IonHeader,
+  IonAvatar, IonBackButton, IonButtons, IonButton, IonCard, IonCardContent, IonContent, IonHeader,
   IonItem, IonLabel, IonSpinner, IonText, IonTitle, IonToolbar,
 } from '@ionic/angular';
 import { Matching, MatchResult } from '../../services/matching';
@@ -11,7 +11,7 @@ import { Matching, MatchResult } from '../../services/matching';
   templateUrl: './matching.page.html',
   styleUrls: ['./matching.page.scss'],
   imports: [
-    IonAvatar, IonButton, IonCard, IonCardContent, IonContent, IonHeader,
+    IonAvatar, IonBackButton, IonButtons, IonButton, IonCard, IonCardContent, IonContent, IonHeader,
     IonItem, IonLabel, IonSpinner, IonText, IonTitle, IonToolbar, RouterLink,
   ],
 })

@@ -1,6 +1,12 @@
 <ion-header>
   <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
     <ion-title>Films MovieDB</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleView()">{{ view() === 'grid' ? 'Liste' : 'Grille' }}</ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -13,6 +19,38 @@
   </ion-searchbar>
   <ion-button expand="block" (click)="searchMovies()" [disabled]="isSearching()">Rechercher</ion-button>
 
+  <div class="filters">
+    <ion-select
+      interface="popover"
+      label="Trier"
+      [value]="sortBy()"
+      (ionChange)="sortBy.set($any($event).detail.value)">
+      <ion-select-option value="popular">Popularité TMDB</ion-select-option>
+      <ion-select-option value="title">Titre (A-Z)</ion-select-option>
+      <ion-select-option value="date">Date (plus récent)</ion-select-option>
+      <ion-select-option value="rating">Note</ion-select-option>
+    </ion-select>
+
+    @if (availableGenres().length > 0) {
+      <ion-select
+        interface="popover"
+        label="Genre"
+        [value]="selectedGenre()"
+        (ionChange)="selectedGenre.set($any($event).detail.value)">
+        <ion-select-option value="">Tous les genres</ion-select-option>
+        @for (genre of availableGenres(); track genre) {
+          <ion-select-option [value]="genre">{{ genre }}</ion-select-option>
+        }
+      </ion-select>
+    }
+
+    <ion-toggle
+      [checked]="hideFavorited()"
+      (ionChange)="hideFavorited.set($any($event).detail.checked)">
+      Masquer mes favoris
+    </ion-toggle>
+  </div>
+
   @if (errorMessage()) {
     <ion-text color="danger"><p>{{ errorMessage() }}</p></ion-text>
   }
@@ -20,24 +58,27 @@
   @if (isLoading() || isSearching()) {
     <div class="ion-text-center ion-padding"><ion-spinner></ion-spinner></div>
   } @else {
-    <div class="movie-grid">
-      @for (movie of movies(); track movie.id) {
-        <ion-card>
-<img [src]="movie.posterPath" [alt]="movie.title" />          <ion-card-content>
-            <ion-card-title>{{ movie.title }}</ion-card-title>
-            <ion-button size="small" fill="outline" [routerLink]="['/movie-details', movie.id]">
-              Détails
-            </ion-button>
-            <ion-button size="small"
-              [color]="favoriteIds().has('' + movie.id) ? 'danger' : 'medium'"
-              (click)="toggleFavorite(movie)">
-              {{ favoriteIds().has('' + movie.id) ? '♥ Retirer' : '♡ Favori' }}
-            </ion-button>
-          </ion-card-content>
-        </ion-card>
+    <div [class.movie-grid]="view() === 'grid'" [class.movie-list]="view() === 'list'">
+      @for (movie of visibleMovies(); track movie.id) {
+        <app-movie-card
+          [movie]="movie"
+          [view]="view()"
+          [isFavorite]="favoriteIds().has('' + movie.id)"
+          favoriteAction="favorite"
+          (actionToggled)="toggleFavorite($event)" />
       } @empty {
-        <ion-text><p>Aucun film trouvé.</p></ion-text>
+        <ion-text><p>Aucun film ne correspond aux filtres.</p></ion-text>
       }
     </div>
   }
+
+  <!-- Acces rapide a la playlist, ancre en bas a droite comme sur mobile. -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button routerLink="/favorites">
+      <ion-icon name="heart" aria-hidden="true"></ion-icon>
+      <!-- ion-fab-button ecarte l'attribut aria-label de son hote : le nom
+           accessible passe donc par un texte reserve aux lecteurs d'ecran. -->
+      <span class="visually-hidden">Voir ma playlist de favoris</span>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

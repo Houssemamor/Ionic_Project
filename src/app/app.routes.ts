@@ -10,8 +10,11 @@ export const routes: Routes = [
     canActivate: [authGuard, activeUserGuard],
   },
   {
+    // Redirige vers /home : activeUserGuard renvoie a /login si la session
+    // est absente, donc un visiteur anonyme atterrit quand meme sur la connexion
+    // et un visiteur deja connecte n'a pas a se reconnecter.
     path: '',
-    redirectTo: 'login',
+    redirectTo: 'home',
     pathMatch: 'full',
   },
   {

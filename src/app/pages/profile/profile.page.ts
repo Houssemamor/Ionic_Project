@@ -1,7 +1,9 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import {
+  IonBackButton,
   IonButton,
+  IonButtons,
   IonCard,
   IonCardContent,
   IonContent,
@@ -23,7 +25,7 @@ const PROFILE_LOAD_TIMEOUT_MS = 12000;
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
   imports: [
-    IonButton, IonCard, IonCardContent, IonContent, IonHeader,
+    IonBackButton, IonButton, IonButtons, IonCard, IonCardContent, IonContent, IonHeader,
     IonItem, IonLabel, IonSpinner, IonText, IonTitle, IonToolbar,
     RouterLink,
   ],

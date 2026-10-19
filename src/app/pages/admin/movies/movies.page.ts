@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 // Importe les composants visuels Ionic utilisés dans le template HTML.
-import { IonButton, IonContent, IonHeader, IonInput, IonItem, IonLabel, IonList, IonSelect, IonSelectOption, IonText, IonTitle, IonToolbar } from '@ionic/angular';
+import { IonBackButton, IonButtons, IonButton, IonContent, IonHeader, IonInput, IonItem, IonLabel, IonList, IonSelect, IonSelectOption, IonText, IonTitle, IonToolbar } from '@ionic/angular';
 
 // Movie est le service d'accès à Firestore ; MovieModel décrit la forme d'un film.
 import { Movie } from '../../../services/movie';
@@ -18,7 +18,7 @@ import { Movie as MovieModel } from '../../../models/movie.model';
   templateUrl: './movies.page.html',
   styleUrls: ['./movies.page.scss'],
   // Composants et modules utilisables dans le template.
-  imports: [IonButton, IonContent, IonHeader, IonInput, IonItem, IonLabel, IonList, IonSelect, IonSelectOption, IonText, IonTitle, IonToolbar, CommonModule, FormsModule]
+  imports: [IonBackButton, IonButtons, IonButton, IonContent, IonHeader, IonInput, IonItem, IonLabel, IonList, IonSelect, IonSelectOption, IonText, IonTitle, IonToolbar, CommonModule, FormsModule]
 })
 export class MoviesPage implements OnInit {
   // Injecte le service responsable des opérations Firestore sur les films.

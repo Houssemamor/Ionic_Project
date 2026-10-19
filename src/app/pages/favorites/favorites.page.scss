@@ -1,0 +1,20 @@
+// Le style des cartes (affiche, titre, genres, actions) appartient au composant
+// app-movie-card ; ces fichiers ne portent que la mise en page des conteneurs.
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.favorite-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.favorite-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

@@ -1,0 +1,81 @@
+<ion-card
+  class="movie-card"
+  [class.list]="view() === 'list'"
+  (pointerdown)="onPressStart()"
+  (pointerup)="onPressEnd()"
+  (pointerleave)="onPressEnd()"
+  (pointercancel)="onPressEnd()"
+  (pointermove)="onPressEnd()">
+
+  <div class="card-body">
+    <!-- L'affiche est un vrai bouton : navigation au clic et accessible au clavier. -->
+    <div class="poster-wrapper">
+      <button type="button" class="poster-button" (click)="openDetails()">
+        @if (movie().posterPath) {
+          <img class="poster" [src]="movie().posterPath" [alt]="movie().title" />
+        } @else {
+          <span class="poster placeholder" aria-hidden="true"></span>
+        }
+      </button>
+
+      <!-- Badge de note en mode grille, superpose a l'affiche. role="img" donne
+           un nom accessible fiable au badge, qui n'est pas un element de formulaire. -->
+      @if (view() === 'grid' && rating()) {
+        <span class="rating-badge" role="img" [attr.aria-label]="ratingLabel()">
+          <ion-icon name="star" aria-hidden="true"></ion-icon>
+          {{ rating() }}
+        </span>
+      }
+    </div>
+
+    <div class="card-text">
+      <h2 class="title">
+        {{ movie().title }}
+        @if (year()) {
+          <span class="year">({{ year() }})</span>
+        }
+      </h2>
+      @if (genresLabel()) {
+        <p class="genres">{{ genresLabel() }}</p>
+      }
+      <!-- En mode liste l'affiche est trop petite pour un badge : la note
+           prend place dans le bloc texte, apres les genres. -->
+      @if (view() === 'list' && rating()) {
+        <p class="rating" role="img" [attr.aria-label]="ratingLabel()">
+          <ion-icon name="star" aria-hidden="true"></ion-icon>
+          {{ rating() }}
+        </p>
+      }
+    </div>
+  </div>
+
+  <!-- Element separe pour les actions : jamais declencheur d'appui long. -->
+  <div class="card-actions" (pointerdown)="$event.stopPropagation()">
+    @if (view() === 'grid') {
+      <ion-button size="small" fill="outline" (click)="openDetails()">Détails</ion-button>
+      <ion-button size="small" [color]="actionColor()" (click)="actionToggled.emit(movie())">
+        {{ actionLabel() }}
+      </ion-button>
+    } @else {
+      <!-- Mode liste : boutons icones empiles, chaque icone porte son libelle
+           pour les lecteurs d'ecran et son infobulle au survol. -->
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Voir les détails"
+        title="Voir les détails"
+        (click)="openDetails()">
+        <ion-icon name="information-circle-outline"></ion-icon>
+      </button>
+      <button
+        type="button"
+        class="icon-button"
+        [class.filled]="favoriteAction() !== 'remove' && isFavorite()"
+        [attr.aria-label]="actionLabel()"
+        [title]="actionLabel()"
+        (click)="actionToggled.emit(movie())">
+        <ion-icon [name]="actionIcon()"></ion-icon>
+      </button>
+    }
+  </div>
+</ion-card>

@@ -1,6 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import {
-  IonButton, IonContent, IonHeader, IonItem, IonLabel, IonList,
+  IonBackButton, IonButtons, IonButton, IonContent, IonHeader, IonItem, IonLabel, IonList,
   IonSearchbar, IonSegment, IonSegmentButton, IonSpinner, IonText,
   IonTitle, IonToolbar,
 } from '@ionic/angular';
@@ -14,7 +14,7 @@ type StatusFilter = 'all' | 'active' | 'inactive';
   templateUrl: './users.page.html',
   styleUrls: ['./users.page.scss'],
   imports: [
-    IonButton, IonContent, IonHeader, IonItem, IonLabel, IonList,
+    IonBackButton, IonButtons, IonButton, IonContent, IonHeader, IonItem, IonLabel, IonList,
     IonSearchbar, IonSegment, IonSegmentButton, IonSpinner, IonText,
     IonTitle, IonToolbar,
   ],
