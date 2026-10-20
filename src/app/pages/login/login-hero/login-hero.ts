@@ -10,8 +10,8 @@ import { TranslatePipe } from '../../../i18n/translate.pipe';
 // l'enregistrement realise par une autre page.
 addIcons({ pause, play, star });
 
-const AUTO_SLIDE_MS = 6000;
-const SLIDE_LIMIT = 5;
+const AUTO_SLIDE_MS = 2500;
+const SLIDE_LIMIT = 7;
 
 /**
  * Diaporama de la page de connexion.

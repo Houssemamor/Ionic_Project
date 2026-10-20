@@ -72,17 +72,17 @@ describe('LoginHeroComponent', () => {
     await load();
 
     const element = fixture.nativeElement as HTMLElement;
-    expect(nowPlayingHighlights).toHaveBeenCalledWith(5);
+    expect(nowPlayingHighlights).toHaveBeenCalledWith(7);
     expect(element.querySelector('.hero-content h2')?.textContent).toContain('Film A');
     expect(element.querySelectorAll('.hero-slide').length).toBe(3);
     expect(element.querySelectorAll('.hero-slide.active').length).toBe(1);
     expect(element.querySelectorAll('.hero-dot').length).toBe(3);
   });
 
-  it('avance automatiquement apres six secondes', async () => {
+  it('avance automatiquement apres 2,5 secondes', async () => {
     await load();
 
-    await vi.advanceTimersByTimeAsync(6000);
+    await vi.advanceTimersByTimeAsync(2500);
     fixture.detectChanges();
 
     expect(component.activeIndex()).toBe(1);
@@ -98,11 +98,11 @@ describe('LoginHeroComponent', () => {
     pause?.click();
     fixture.detectChanges();
 
-    await vi.advanceTimersByTimeAsync(12000);
+    await vi.advanceTimersByTimeAsync(5000);
     expect(component.activeIndex()).toBe(0);
 
     pause?.click();
-    await vi.advanceTimersByTimeAsync(6000);
+    await vi.advanceTimersByTimeAsync(2500);
     expect(component.activeIndex()).toBe(1);
   });
 
@@ -134,6 +134,6 @@ describe('LoginHeroComponent', () => {
     await load();
 
     expect((fixture.nativeElement as HTMLElement).querySelector('.hero-pause')).toBeNull();
-    await vi.advanceTimersByTimeAsync(6000);
+    await vi.advanceTimersByTimeAsync(2500);
     expect(component.activeIndex()).toBe(0);
   });});
