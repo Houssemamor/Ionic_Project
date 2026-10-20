@@ -61,6 +61,10 @@ export class RegisterPage {
         quality: 80,
         allowEditing: false,
         resultType: CameraResultType.DataUrl,
+        // Sur le web, le prompt Camera depend de PWA Elements (non installe
+        // ici). webUseInput ouvre directement le selecteur de fichiers du
+        // navigateur ; Capacitor ignore cette option sur mobile.
+        webUseInput: true,
       });
       if (!photo.dataUrl) {
         this.errorMessage = this.i18n.t('errors.photoNotRetrieved');

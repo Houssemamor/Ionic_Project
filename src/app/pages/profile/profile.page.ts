@@ -138,6 +138,10 @@ export class ProfilePage implements OnInit {
         allowEditing: true,
         resultType: CameraResultType.DataUrl,
         source: CameraSource.Prompt,
+        // Sur le web, CameraSource.Prompt exige le composant PWA Elements
+        // pwa-action-sheet, absent de ce projet. Le picker natif du navigateur
+        // est utilise a la place ; l'option est ignoree sur mobile.
+        webUseInput: true,
       });
       if (!photo.dataUrl) {
         this.photoErrorMessage.set(this.i18n.t('errors.photoNotRetrieved'));

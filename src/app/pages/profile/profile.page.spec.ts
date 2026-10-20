@@ -128,9 +128,14 @@ describe('ProfilePage', () => {
     expect(Camera.getPhoto).toHaveBeenCalledWith(expect.objectContaining({
       allowEditing: true,
       resultType: CameraResultType.DataUrl,
+      // Sans PWA Elements, le prompt web resterait bloque sur un custom
+      // element inexistant : le file input doit etre force.
+      webUseInput: true,
     }));
     expect(updateProfilePhoto).toHaveBeenCalledWith('data:image/jpeg;base64,prepared');
     expect(component.profile()?.photoUrl).toBe('data:image/jpeg;base64,new-photo');
+    expect(fixture.nativeElement.querySelector('img.avatar')?.getAttribute('src'))
+      .toBe('data:image/jpeg;base64,new-photo');
     expect(component.isUpdatingPhoto()).toBe(false);
   });
 
