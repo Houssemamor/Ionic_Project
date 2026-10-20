@@ -7,6 +7,7 @@ import { Auth } from './auth';
 import { Favorite as FavoriteModel } from '../models/favorite.model';
 import { Movie } from '../models/movie.model';
 import { TranslationService } from '../i18n/translation.service';
+import { withoutUndefined } from '../shared/firestore';
 
 @Injectable({ providedIn: 'root' })
 export class Favorite {
@@ -35,12 +36,15 @@ async list(): Promise<FavoriteModel[]> {
 
   async add(movie: Movie): Promise<void> {
     const userId = await this.requireUserId();
-    await setDoc(doc(this.firebase.firestore, 'favorites', `${userId}_${movie.id}`), {
-      ...movie,
-      movieId: movie.id,
-      userId,
-      addedAt: serverTimestamp(),
-    });
+    await setDoc(
+      doc(this.firebase.firestore, 'favorites', `${userId}_${movie.id}`),
+      withoutUndefined({
+        ...movie,
+        movieId: movie.id,
+        userId,
+        addedAt: serverTimestamp(),
+      }),
+    );
   }
 
   async remove(movieId: string): Promise<void> {

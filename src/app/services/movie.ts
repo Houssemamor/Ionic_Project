@@ -4,6 +4,7 @@ import { addDoc, collection, deleteDoc, doc, getDocs, serverTimestamp, updateDoc
 import { FirebaseService } from './firebase.service';
 import { Movie as MovieModel } from '../models/movie.model';
 import { TranslationService } from '../i18n/translation.service';
+import { withoutUndefined } from '../shared/firestore';
 
 // Limite le temps d'attente afin d'éviter un écran bloqué indéfiniment.
 const MOVIES_REQUEST_TIMEOUT_MS = 10000;
@@ -54,16 +55,22 @@ export class Movie {
 
   // Ajoute un nouveau film et enregistre la date de création côté serveur.
   async create(movie: Omit<MovieModel, 'id'>): Promise<MovieModel> {
-    const reference = await addDoc(collection(this.firebase.firestore, 'movies'), {
-      ...movie,
-      createdAt: serverTimestamp(),
-    });
+    const reference = await addDoc(
+      collection(this.firebase.firestore, 'movies'),
+      withoutUndefined({
+        ...movie,
+        createdAt: serverTimestamp(),
+      }),
+    );
     return { id: reference.id, ...movie };
   }
 
   // Met à jour uniquement les propriétés fournies pour un film existant.
   async update(id: string, movie: Partial<Omit<MovieModel, 'id'>>): Promise<void> {
-    await updateDoc(doc(this.firebase.firestore, 'movies', id), movie);
+    await updateDoc(
+      doc(this.firebase.firestore, 'movies', id),
+      withoutUndefined(movie),
+    );
   }
 
   // Supprime définitivement le document du film dans Firestore.
